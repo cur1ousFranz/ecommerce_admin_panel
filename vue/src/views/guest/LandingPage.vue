@@ -75,7 +75,7 @@ import store from "../../store";
     formData.append('password', model.value.password)
     formData.append('remember', model.value.remember)
     try {
-      await store.dispatch('signInUser', formData)
+      await store.dispatch('signInAdminUser', formData)
       window.location = '/home'
 
     } catch (err) {

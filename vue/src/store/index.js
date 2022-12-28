@@ -24,6 +24,13 @@ const store = createStore({
         commit('setUser', res.data)
         return res
     },
+    async signInAdminUser({commit}, formData) {
+        commit('setAuthLoadStatus', true)
+        const res = await axiosClient.post(`/admin/signin`, formData);
+        commit('setAuthLoadStatus', false)
+        commit('setUser', res.data)
+        return res
+    },
     async signOutUser({commit}) {
       await axiosClient.get(`/signout`);
       commit('unsetUser')
