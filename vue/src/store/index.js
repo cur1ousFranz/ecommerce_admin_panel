@@ -12,10 +12,32 @@ const store = createStore({
     authLoadStatus : {
       loadStatus : false
     },
+    categories : {
+      mainCategory : null,
+      subCategory : null,
+      attribute : null,
+    }
 
   },
   getters: {},
   actions: {
+    // ADMIN
+    async getAttribute({commit}, id) {
+        const res = await axiosClient.get(`/product/category/${id}/attribute`);
+        commit('setAttribute', res.data)
+        return res
+    },
+    async getSubCategory({commit}, id) {
+        const res = await axiosClient.get(`/product/category/${id}`);
+        commit('setSubCategory', res.data)
+        return res
+    },
+    async getMainCategory({commit}) {
+        const res = await axiosClient.get(`/product/category`);
+        commit('setMainCategory', res.data)
+        return res
+    },
+
     // AUTH
     async signInUser({commit}, formData) {
         commit('setAuthLoadStatus', true)
@@ -37,6 +59,17 @@ const store = createStore({
     },
   },
   mutations: {
+    // ADMIN
+    setAttribute : (state, attribute) => {
+      state.categories.attribute = attribute.data
+    },
+    setSubCategory : (state, categories) => {
+      state.categories.subCategory = categories.data
+    },
+    setMainCategory : (state, categories) => {
+      state.categories.mainCategory = categories.data
+    },
+    // AUTH
     setUser : (state, data) => {
       localStorage.removeItem('USER_ID')
       localStorage.setItem('TOKEN', data.token)

@@ -46,7 +46,7 @@
     </table>
     <ProductModal v-show="isModalVisible" @close="closeModal" @some-event="confirm" >
         <template v-slot:header>
-          Product
+          Create Product
         </template>
 
         <template v-slot:body>
@@ -67,30 +67,95 @@
                         <label for="deescription">Description</label>
                         <input id="deescription" type="text" class='w-full py-2 border px-2' placeholder="Ex. Black T-Shirt">
                     </div>
-                    <div class="space-y-2">
-                        <label for="qty_stock">Qty Stock</label>
-                        <input id="qty_stock" type="text" class='w-full py-2 border px-2' placeholder="Ex. 10">
-                    </div>
                 </div>
                 <div class="w-full space-y-2">
                     <div class="space-y-2">
                         <label for="price">Price</label>
-                        <input id="price" type="text" class='w-full py-2 border px-2' placeholder="Price">
+                        <input v-on:keypress="numbersOnly" id="price" type="text" class='w-full py-2 border px-2' placeholder="₱" maxlength="10">
                     </div>
                     <div class="space-y-2">
-                        <label for="category">Category</label>
-                        <input id="category" type="text" class='w-full py-2 border px-2' placeholder="Category">
+                      <label for="qty_stock">Qty Stock</label>
+                      <input v-on:keypress="numbersOnly" id="qty_stock" type="text" class='w-full py-2 border px-2' placeholder="Ex. 10" maxlength="10">
                     </div>
                     <div class="space-y-2">
-                        <label for="attribute">Attribute</label>
-                        <input id="attribute" type="text" class='w-full py-2 border px-2' placeholder="Description">
-                    </div>
-                    <div class="space-y-2">
-                        <label for="value">Value</label>
-                        <input id="value" type="text" class='w-full py-2 border px-2' placeholder="Value">
+                      <label for="Color">Color: <span class="text-gray-700 font-semibold">{{ model.color }}</span></label>
+                      <div class="grid grid-cols-8">
+                        <svg @click="selectColor('yellow')" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" :class="[ model.color === 'yellow' ? 'bi bi-circle-fill m-1 rounded-full cursor-pointer ring ring-gray-500 ring-offset-2' : 'bi bi-circle-fill m-1 rounded-full cursor-pointer hover:ring hover:ring-gray-500 hover:ring-offset-2']" viewBox="0 0 16 16">
+                          <circle cx="8" cy="8" r="8" class="text-yellow-500"/>
+                        </svg>
+                        <svg @click="selectColor('green')" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" :class="[ model.color === 'green' ? 'bi bi-circle-fill m-1 rounded-full cursor-pointer ring ring-gray-500 ring-offset-2' : 'bi bi-circle-fill m-1 rounded-full cursor-pointer hover:ring hover:ring-gray-500 hover:ring-offset-2']" viewBox="0 0 16 16">
+                          <circle cx="8" cy="8" r="8" class="text-green-500"/>
+                        </svg>
+                        <svg @click="selectColor('blue')" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" :class="[ model.color === 'blue' ? 'bi bi-circle-fill m-1 rounded-full cursor-pointer ring ring-gray-500 ring-offset-2' : 'bi bi-circle-fill m-1 rounded-full cursor-pointer hover:ring hover:ring-gray-500 hover:ring-offset-2']" viewBox="0 0 16 16">
+                          <circle cx="8" cy="8" r="8" class="text-blue-500"/>
+                        </svg>
+                        <svg @click="selectColor('violet')" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" :class="[ model.color === 'violet' ? 'bi bi-circle-fill m-1 rounded-full cursor-pointer ring ring-gray-500 ring-offset-2' : 'bi bi-circle-fill m-1 rounded-full cursor-pointer hover:ring hover:ring-gray-500 hover:ring-offset-2']" viewBox="0 0 16 16">
+                          <circle cx="8" cy="8" r="8" class="text-violet-500"/>
+                        </svg>
+                        <svg @click="selectColor('red')" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" :class="[ model.color === 'red' ? 'bi bi-circle-fill m-1 rounded-full cursor-pointer ring ring-gray-500 ring-offset-2' : 'bi bi-circle-fill m-1 rounded-full cursor-pointer hover:ring hover:ring-gray-500 hover:ring-offset-2']" viewBox="0 0 16 16">
+                          <circle cx="8" cy="8" r="8" class="text-red-600"/>
+                        </svg>
+                        <svg @click="selectColor('orange')" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" :class="[ model.color === 'orange' ? 'bi bi-circle-fill m-1 rounded-full cursor-pointer ring ring-gray-500 ring-offset-2' : 'bi bi-circle-fill m-1 rounded-full cursor-pointer hover:ring hover:ring-gray-500 hover:ring-offset-2']" viewBox="0 0 16 16">
+                          <circle cx="8" cy="8" r="8" class="text-orange-500"/>
+                        </svg>
+                        <svg @click="selectColor('gray')" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" :class="[ model.color === 'gray' ? 'bi bi-circle-fill m-1 rounded-full cursor-pointer ring ring-gray-500 ring-offset-2' : 'bi bi-circle-fill m-1 rounded-full cursor-pointer hover:ring hover:ring-gray-500 hover:ring-offset-2']" viewBox="0 0 16 16">
+                          <circle cx="8" cy="8" r="8" class="text-gray-500"/>
+                        </svg>
+                        <svg @click="selectColor('pink')" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" :class="[ model.color === 'pink' ? 'bi bi-circle-fill m-1 rounded-full cursor-pointer ring ring-gray-500 ring-offset-2' : 'bi bi-circle-fill m-1 rounded-full cursor-pointer hover:ring hover:ring-gray-500 hover:ring-offset-2']" viewBox="0 0 16 16">
+                          <circle cx="8" cy="8" r="8" class="text-pink-500"/>
+                        </svg>
+                        <svg @click="selectColor('black')" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" :class="[ model.color === 'black' ? 'bi bi-circle-fill m-1 rounded-full cursor-pointer ring ring-gray-500 ring-offset-2' : 'bi bi-circle-fill m-1 rounded-full cursor-pointer hover:ring hover:ring-gray-500 hover:ring-offset-2']" viewBox="0 0 16 16">
+                          <circle cx="8" cy="8" r="8" class="text-black"/>
+                        </svg>
+                        <svg @click="selectColor('white')" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" :class="[ model.color === 'white' ? 'bi bi-circle-fill m-1 rounded-full cursor-pointer ring ring-gray-500 ring-offset-2' : 'bi bi-circle-fill m-1 rounded-full cursor-pointer border-2 hover:ring hover:ring-gray-500 hover:ring-offset-2']" viewBox="0 0 16 16">
+                          <circle cx="8" cy="8" r="8" class="text-white"/>
+                        </svg>
+                        <svg @click="selectColor('brown')" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" :class="[ model.color === 'brown' ? 'bi bi-circle-fill m-1 rounded-full cursor-pointer ring ring-gray-500 ring-offset-2' : 'bi bi-circle-fill m-1 rounded-full cursor-pointer hover:ring hover:ring-gray-500 hover:ring-offset-2']" viewBox="0 0 16 16">
+                          <circle cx="8" cy="8" r="8" class="text-amber-600"/>
+                        </svg>
+                      </div>
                     </div>
                 </div>
             </div>
+            <div>
+                <hr class="mt-4">
+                <h1 class="font-semibold my-3">Product Category</h1>
+            </div>
+            <div class="w-full py-2 flex flex-col space-x-0 md:space-x-6 md:flex-row">
+                <div class="w-full space-y-2">
+                  <div class="space-y-2">
+                    <label for="category">Category</label>
+                    <select @change="chooseCategory" v-model="model.mainCategoryId" id="category" class='w-full py-2 border px-2'>
+                      <option v-for="category in mainCategories" :key="category.id" :value="category.id">
+                        {{ category.name }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+                <div class="w-full space-y-2">
+                  <div class="space-y-2">
+                    <label for="sub_category">Sub Category</label>
+                    <select  @change="chooseSubCategory" v-model="model.subCategoryId" id="category" class='w-full py-2 border px-2'>
+                      <option v-for="category in subCategories" :key="category.id" :value="category.id" >
+                        {{ category.name }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+            </div>
+            <div>
+                <hr class="mt-4">
+                <h1 class="font-semibold my-3">Product Attributes</h1>
+            </div>
+            <div v-for="attribute in attributes" :key="attribute.id" class="w-full py-2 flex flex-col space-x-0 md:space-x-6 md:flex-row">
+              <!-- TODO ATTRIBUTES -->
+              <!-- <div>
+                <label v-if="attribute.name === 'Activity'" for="activity">Activity</label>
+                <input v-if="attribute.name === 'Activity'" id="activity" type="text" class='w-full py-2 border px-2' placeholder="Ex. Black T-Shirt">
+
+              </div> -->
+            </div>
+
             <div class="mb-6 space-x-6">
                 <h1 class="font-semibold  mt-3">Product Image</h1>
                 <label for="image" class="cursor-pointer">
@@ -111,22 +176,61 @@
 
 <script setup>
 import { ref } from '@vue/reactivity'
+import { computed, onMounted } from '@vue/runtime-core'
+import store from '../../store'
 import ProductModal from '../../components/ProductModal.vue'
 
-    const isModalVisible = ref(false)
+  const isModalVisible = ref(false)
+  const model = ref({
+    sku : '',
+    name : '',
+    description : '',
+    price : '',
+    qty_stock : '',
+    color : 'yellow',
+    mainCategoryId : 1,
+    subCategoryId : 4,
+    attributeId : 4,
+  })
 
-    function showModal(){
-      isModalVisible.value = true
-    }
+  const mainCategories = computed(() => store.state.categories.mainCategory)
+  const subCategories = computed(() => store.state.categories.subCategory)
+  const attributes = computed(() => store.state.categories.attribute)
+  onMounted(async () => {
+    await store.dispatch('getMainCategory')
+    await store.dispatch('getSubCategory', model.value.mainCategoryId)
+    await store.dispatch('getAttribute', model.value.subCategoryId)
+  })
 
-    function confirm(){
-      console.log('confirmed');
-    }
+  const showModal = () => isModalVisible.value = true
+  const closeModal = () => isModalVisible.value = false
 
-    function closeModal(){
-      isModalVisible.value = false
+  const confirm = () => {
+    console.log('confirmed')
+  }
+
+  const numbersOnly = (evt) => {
+    evt = (evt) ? evt : window.event
+    var charCode = (evt.which) ? evt.which : evt.keyCode
+    if ((charCode > 31 && (charCode < 48 || charCode > 57)) && charCode !== 46) {
+      evt.preventDefault()
+    } else {
+      return true
     }
+  }
+
+  const selectColor = (color) => {
+    model.value.color = color
+  }
+
+  const chooseCategory = async () => { 
+    const res = await store.dispatch('getSubCategory', model.value.mainCategoryId)
+    model.value.subCategoryId = res.data.data[0].id
+    await store.dispatch('getAttribute', model.value.subCategoryId)
+  }
+
+  const chooseSubCategory = async () => { 
+    await store.dispatch('getAttribute', model.value.subCategoryId)
+  }
+
 </script>
-
-<style>
-</style>
