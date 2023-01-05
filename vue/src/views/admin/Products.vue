@@ -106,9 +106,9 @@
                 <h1 class="font-semibold my-3">Product Attributes</h1>
             </div>
             <div class="w-full grid grid-cols-1 py-2 gap-x-5 md:grid-cols-2">
-              <div v-for="attribute in attributes" :key="attribute.id">
+              <div v-for="attribute in model.attributes" :key="attribute.id">
                 <div class="space-y-2" v-if="attribute.name === 'Color'">
-                  <label for="Color">Color: <span class="text-gray-700 font-semibold">{{ model.color }}</span></label>
+                  <label>Color: <span class="text-gray-700 font-semibold">{{ model.color }}</span></label>
                   <div class="grid grid-cols-8">
                     <Color @click="selectColor('yellow')" color="yellow" :currentColor="model.color" circleColor="text-yellow-500"/>
                     <Color @click="selectColor('green')" color="green" :currentColor="model.color" circleColor="text-green-500"/>
@@ -123,7 +123,14 @@
                     <Color @click="selectColor('brown')" color="brown" :currentColor="model.color" circleColor="text-amber-600"/>
                   </div>
                 </div>
-                <div v-if="attribute.name !== 'Color'">
+                <div v-if="attribute.name === 'Size'">
+                  <h1 class="text-gray-800">Size</h1>
+                  <div class="grid grid-cols-8 gap-2">
+                    <Size v-for="size in model.sizes" :key="size" 
+                    @click="selectSize(size)" :size="size" :currentSize="model.size"/>
+                  </div>
+                </div>
+                <div v-if="attribute.name !== 'Color' && attribute.name !== 'Size'">
                   <div class="flex justify-between">
                     <label :for="attribute.name">{{ attribute.name }}</label>
                     <button @click="showValueModal(attribute.name, attribute.id)">
@@ -137,7 +144,7 @@
                   <!-- TODO | LOOP VALUES ON SPECIFIC ATTRIBUTE -->
                   <select :id="attribute.name" class=' w-full py-2 border px-2 my-2'>
                     <option selected disabled>Select</option>
-                    <option v-for="value in attribute.values" :key="value.id">{{ value.name }}</option>
+                    <option v-for="value in attribute.values" :key="value.id" :value="value.name">{{ value.name }}</option>
                   </select>
                 </div>
               </div>
@@ -170,18 +177,18 @@
         <p class="text-sm absolute text-red-500"> {{ model.errors.valueError }}</p>
       </template>
     </CreateValueModal>
-    <pre>{{ attributes }}</pre>
   </div>
 </template>
 
 <script setup>
 import { ref } from '@vue/reactivity'
-import { computed, onMounted } from '@vue/runtime-core'
+import { computed, onMounted, watch } from '@vue/runtime-core'
 import alert from '../../alert.js'
 import store from '../../store'
 import ProductModal from '../../components/ProductModal.vue'
 import CreateValueModal from '../../components/CreateValueModal.vue'
 import Color from '../../components/Icons/Color.vue'
+import Size from '../../components/Icons/Size.vue'
 
   const isModalVisible = ref(false)
   const isValueModalVisible = ref(false)
@@ -192,21 +199,35 @@ import Color from '../../components/Icons/Color.vue'
     price : '',
     qty_stock : '',
     color : 'yellow',
+    size : '',
     mainCategoryId : 1,
     subCategoryId : 4,
     attributeId : 4,
+    attributes : null,
     attributeValue : {
       valueName : '',
       newValue : '',
     },
     errors : {
       valueError : ''
-    }
+    },
+    values : '',
+    sizes : ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '1XL', '2XL', '3XL', '4XL', '5XL'],
+    
   })
 
   const mainCategories = computed(() => store.state.categories.mainCategory)
   const subCategories = computed(() => store.state.categories.subCategory)
-  const attributes = computed(() => store.state.categories.attribute)
+  // const attributes = computed(() => store.state.categories.attribute)
+
+  watch(() => store.state.categories.attribute,
+    (newVal, oldVal) => {
+        model.value.attributes = {
+          ...JSON.parse(JSON.stringify(newVal)),
+        }
+      }
+  )
+
   onMounted(async () => {
     await store.dispatch('getMainCategory')
     await store.dispatch('getSubCategory', model.value.mainCategoryId)
@@ -236,6 +257,7 @@ import Color from '../../components/Icons/Color.vue'
       await store.dispatch('createValue', formData)
       closeValueModal()
       alert('Value created successfully!')
+      model.value.attributeValue.newValue = ''
     } catch (error) {
       model.value.errors.valueError = error.response.data.errors.name[0];
     }
@@ -251,9 +273,8 @@ import Color from '../../components/Icons/Color.vue'
     }
   }
 
-  const selectColor = (color) => {
-    model.value.color = color
-  }
+  const selectColor = (color) => model.value.color = color
+  const selectSize = (size) => model.value.size = size
 
   const chooseCategory = async () => { 
     const res = await store.dispatch('getSubCategory', model.value.mainCategoryId)

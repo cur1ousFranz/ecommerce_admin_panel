@@ -23,7 +23,8 @@ const store = createStore({
   actions: {
     // ADMIN
     async createValue({commit}, formData) {
-        const res = await axiosClient.post(`/attribute/value`, formData);
+        const res = await axiosClient.post(`/attribute`, formData);
+        commit('setAttribute', res.data)
         return res
     },
     async getAttribute({commit}, id) {
