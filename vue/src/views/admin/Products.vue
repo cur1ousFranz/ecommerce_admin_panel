@@ -44,7 +44,7 @@
         </tr>
       </tbody>
     </table>
-    <ProductModal v-show="isModalVisible" @close="closeModal" @some-event="confirm" >
+    <ProductModal v-show="isModalVisible" @close="closeModal" @some-event="confirmCreateProduct" >
         <template v-slot:header>
           Create Product
         </template>
@@ -67,11 +67,11 @@
                 <div class="w-full space-y-2">
                   <div class="space-y-2">
                       <label for="price">Price</label>
-                      <input v-on:keypress="numbersOnly" id="price" type="text" class='w-full py-2 border px-2' placeholder="₱" maxlength="10">
+                      <input v-on:keypress="numberkey" id="price" type="text" class='w-full py-2 border px-2' placeholder="₱" maxlength="10">
                   </div>
                   <div class="space-y-2">
-                    <label for="qty_stock">Qty Stock</label>
-                    <input v-on:keypress="numbersOnly" id="qty_stock" type="text" class='w-full py-2 border px-2' placeholder="Ex. 10" maxlength="10">
+                    <label for="qty_stock">Qty Stock (All Sizes)</label>
+                    <input v-on:keypress="numberkey" id="qty_stock" type="text" class='w-full py-2 border px-2' placeholder="Ex. 10" maxlength="10">
                   </div>
                 </div>
             </div>
@@ -83,7 +83,7 @@
                 <div class="w-full space-y-2">
                   <div class="space-y-2">
                     <label for="category">Category</label>
-                    <select @change="chooseCategory" v-model="model.mainCategoryId" id="category" class='w-full py-2 border px-2'>
+                    <select @change="chooseCategory" v-model="model.categories.mainCategoryId" id="category" class='w-full py-2 border px-2'>
                       <option v-for="category in mainCategories" :key="category.id" :value="category.id">
                         {{ category.name }}
                       </option>
@@ -93,7 +93,7 @@
                 <div class="w-full space-y-2">
                   <div class="space-y-2">
                     <label for="sub_category">Sub Category</label>
-                    <select  @change="chooseSubCategory" v-model="model.subCategoryId" id="category" class='w-full py-2 border px-2'>
+                    <select  @change="chooseSubCategory" v-model="model.categories.subCategoryId" id="category" class='w-full py-2 border px-2'>
                       <option v-for="category in subCategories" :key="category.id" :value="category.id" >
                         {{ category.name }}
                       </option>
@@ -106,28 +106,28 @@
                 <h1 class="font-semibold my-3">Product Attributes</h1>
             </div>
             <div class="w-full grid grid-cols-1 py-2 gap-x-5 md:grid-cols-2">
-              <div v-for="attribute in model.attributes" :key="attribute.id">
+              <div v-for="attribute in model.attributes.attributeList" :key="attribute.id">
                 <div class="space-y-2" v-if="attribute.name === 'Color'">
-                  <label>Color: <span class="text-gray-700 font-semibold">{{ model.color }}</span></label>
+                  <label>Color: <span class="text-gray-700 font-semibold">{{ model.details.color }}</span></label>
                   <div class="grid grid-cols-8">
-                    <Color @click="selectColor('yellow')" color="yellow" :currentColor="model.color" circleColor="text-yellow-500"/>
-                    <Color @click="selectColor('green')" color="green" :currentColor="model.color" circleColor="text-green-500"/>
-                    <Color @click="selectColor('blue')" color="blue" :currentColor="model.color" circleColor="text-blue-500"/>
-                    <Color @click="selectColor('violet')" color="violet" :currentColor="model.color" circleColor="text-violet-500"/>
-                    <Color @click="selectColor('red')" color="red" :currentColor="model.color" circleColor="text-red-600"/>
-                    <Color @click="selectColor('orange')" color="orange" :currentColor="model.color" circleColor="text-orange-500"/>
-                    <Color @click="selectColor('gray')" color="gray" :currentColor="model.color" circleColor="text-gray-500"/>
-                    <Color @click="selectColor('pink')" color="pink" :currentColor="model.color" circleColor="text-pink-500"/>
-                    <Color @click="selectColor('black')" color="black" :currentColor="model.color" circleColor="text-black"/>
-                    <Color @click="selectColor('white')" color="white" :currentColor="model.color" circleColor="text-white"/>
-                    <Color @click="selectColor('brown')" color="brown" :currentColor="model.color" circleColor="text-amber-600"/>
+                    <Color @click="selectColor('yellow')" color="yellow" :currentColor="model.details.color" circleColor="text-yellow-500"/>
+                    <Color @click="selectColor('green')" color="green" :currentColor="model.details.color" circleColor="text-green-500"/>
+                    <Color @click="selectColor('blue')" color="blue" :currentColor="model.details.color" circleColor="text-blue-500"/>
+                    <Color @click="selectColor('violet')" color="violet" :currentColor="model.details.color" circleColor="text-violet-500"/>
+                    <Color @click="selectColor('red')" color="red" :currentColor="model.details.color" circleColor="text-red-600"/>
+                    <Color @click="selectColor('orange')" color="orange" :currentColor="model.details.color" circleColor="text-orange-500"/>
+                    <Color @click="selectColor('gray')" color="gray" :currentColor="model.details.color" circleColor="text-gray-500"/>
+                    <Color @click="selectColor('pink')" color="pink" :currentColor="model.details.color" circleColor="text-pink-500"/>
+                    <Color @click="selectColor('black')" color="black" :currentColor="model.details.color" circleColor="text-black"/>
+                    <Color @click="selectColor('white')" color="white" :currentColor="model.details.color" circleColor="text-white"/>
+                    <Color @click="selectColor('brown')" color="brown" :currentColor="model.details.color" circleColor="text-amber-600"/>
                   </div>
                 </div>
                 <div v-if="attribute.name === 'Size'">
                   <h1 class="text-gray-800">Size</h1>
                   <div class="grid grid-cols-8 gap-2">
-                    <Size v-for="size in model.sizes" :key="size" 
-                    @click="selectSize(size)" :size="size" :currentSize="model.size"/>
+                    <Size v-for="size in model.sizes.sizeList" :key="size" 
+                    @click="showSizeModal(size.name)" :size="size" />
                   </div>
                 </div>
                 <div v-if="attribute.name !== 'Color' && attribute.name !== 'Size'">
@@ -166,17 +166,32 @@
     @createValue="confirmCreateValue">
 
       <template v-slot:header>
-        Create {{ model.attributeValue.valueName }} Value
+        Create {{ model.attributes.attributeName }} Value
       </template>
 
       <template v-slot:body>
-        <input v-model="model.attributeValue.newValue" id="image" type="text" 
+        <input v-model="model.attributes.newAttributeValue" type="text" 
         :class=" model.errors.valueError
         ? 'w-full py-2 border border-red-500 focus:outline-red-500 px-2' 
         : 'w-full py-2 border px-2'" placeholder="Value">
         <p class="text-sm absolute text-red-500"> {{ model.errors.valueError }}</p>
       </template>
     </CreateValueModal>
+
+    <CreateValueModal v-show="isSizeModalVisible" @closeValueModal="closeSizeModal" 
+    @createValue="confirmSelectSize">
+
+      <template v-slot:header>
+        Enter total of {{ model.sizes.selectedSize }} size
+      </template>
+
+      <template v-slot:body>
+        <input v-model="model.sizes.totalOfSize" type="text" :class="model.errors.sizeError
+          ? 'w-full py-2 border border-red-500 focus:outline-red-500 px-2' 
+          : 'w-full py-2 border px-2'" v-on:keypress="numberkey" placeholder="Total" min="0" maxlength="3">
+      </template>
+    </CreateValueModal>
+
   </div>
 </template>
 
@@ -184,6 +199,7 @@
 import { ref } from '@vue/reactivity'
 import { computed, onMounted, watch } from '@vue/runtime-core'
 import alert from '../../alert.js'
+import numberkey from '../../numberkey.js'
 import store from '../../store'
 import ProductModal from '../../components/ProductModal.vue'
 import CreateValueModal from '../../components/CreateValueModal.vue'
@@ -192,37 +208,51 @@ import Size from '../../components/Icons/Size.vue'
 
   const isModalVisible = ref(false)
   const isValueModalVisible = ref(false)
+  const isSizeModalVisible = ref(false)
   const model = ref({
-    sku : '',
-    name : '',
-    description : '',
-    price : '',
-    qty_stock : '',
-    color : 'yellow',
-    size : '',
-    mainCategoryId : 1,
-    subCategoryId : 4,
-    attributeId : 4,
-    attributes : null,
-    attributeValue : {
-      valueName : '',
-      newValue : '',
+    details : {
+      sku : '',
+      name : '',
+      description : '',
+      price : '',
+      qty_stock : '',
+      color : 'yellow',
     },
-    errors : {
-      valueError : ''
+    categories : {
+      mainCategoryId : 1,
+      subCategoryId : 4,
+    },
+    attributes : {
+      attributeId : 4,
+      attributeList : null,
+      attributeName : '',
+      newAttributeValue : '',
     },
     values : '',
-    sizes : ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '1XL', '2XL', '3XL', '4XL', '5XL'],
+    sizes : {
+      sizeList : [ 
+        { name : 'XXS', count : 0 }, { name : 'XS', count : 0 }, { name : 'S', count : 0 }, 
+        { name : 'M', count : 0 }, { name : 'L', count : 0 }, { name : 'XL', count : 0 },
+        { name : 'XXL', count : 0 }, { name : 'XXXL', count : 0 }, { name : '1XL', count : 0 },    
+        { name : '2XL', count : 0 }, { name : '3XL', count : 0 }, { name : '4XL', count : 0 },   
+        { name : '5XL', count : 0 }, 
+      ],
+      selectedSize : '',
+      totalOfSize : 0,
+    },
+    errors : {
+      valueError : '',
+      sizeError : ''
+    },
     
   })
 
   const mainCategories = computed(() => store.state.categories.mainCategory)
   const subCategories = computed(() => store.state.categories.subCategory)
-  // const attributes = computed(() => store.state.categories.attribute)
 
   watch(() => store.state.categories.attribute,
     (newVal, oldVal) => {
-        model.value.attributes = {
+        model.value.attributes.attributeList = {
           ...JSON.parse(JSON.stringify(newVal)),
         }
       }
@@ -230,60 +260,67 @@ import Size from '../../components/Icons/Size.vue'
 
   onMounted(async () => {
     await store.dispatch('getMainCategory')
-    await store.dispatch('getSubCategory', model.value.mainCategoryId)
-    await store.dispatch('getAttribute', model.value.subCategoryId)
+    await store.dispatch('getSubCategory', model.value.categories.mainCategoryId)
+    await store.dispatch('getAttribute', model.value.categories.subCategoryId)
   })
 
+  const showSizeModal = (size) => {
+    isSizeModalVisible.value = true
+    selectSize(size)
+  }
+  const closeSizeModal = () => isSizeModalVisible.value = false
   const showModal = () => isModalVisible.value = true
   const closeModal = () => isModalVisible.value = false
   const closeValueModal = () => isValueModalVisible.value = false
-  const showValueModal = (valueName, attributeId) => {
+  const showValueModal = (attributeName, attributeId) => {
     isValueModalVisible.value = true
-    model.value.attributeValue.valueName = valueName
-    model.value.attributeId = attributeId
+    model.value.attributes.attributeName = attributeName
+    model.value.attributes.attributeId = attributeId
   }
 
-  const confirm = () => {
+  const confirmSelectSize = () => {
+    const size = model.value.sizes.selectedSize
+    model.value.sizes.sizeList.forEach(obj => {
+        if(obj.name === size){
+          obj.count = parseInt(model.value.sizes.totalOfSize)
+        }
+    })
+    model.value.sizes.totalOfSize = 0
+    model.value.sizes.selectedSize = ''
+    closeSizeModal()
+  }
+
+  const confirmCreateProduct = () => {
     console.log('confirmed')
   }
 
   const confirmCreateValue = async () => {
     model.value.errors.valueError = ''
     const formData = new FormData()
-    formData.append('name', model.value.attributeValue.newValue)
-    formData.append('attribute_id', model.value.attributeId)
-    formData.append('category_id', model.value.subCategoryId)
+    formData.append('name', model.value.attributes.newAttributeValue)
+    formData.append('attribute_id', model.value.attributes.attributeId)
+    formData.append('category_id', model.value.categories.subCategoryId)
     try {
       await store.dispatch('createValue', formData)
       closeValueModal()
       alert('Value created successfully!')
-      model.value.attributeValue.newValue = ''
+      model.value.attributes.newAttributeValue = ''
     } catch (error) {
       model.value.errors.valueError = error.response.data.errors.name[0];
     }
   }
 
-  const numbersOnly = (evt) => {
-    evt = (evt) ? evt : window.event
-    var charCode = (evt.which) ? evt.which : evt.keyCode
-    if ((charCode > 31 && (charCode < 48 || charCode > 57)) && charCode !== 46) {
-      evt.preventDefault()
-    } else {
-      return true
-    }
-  }
-
-  const selectColor = (color) => model.value.color = color
-  const selectSize = (size) => model.value.size = size
+  const selectColor = (color) => model.value.details.color = color
+  const selectSize = (size) => model.value.sizes.selectedSize = size
 
   const chooseCategory = async () => { 
-    const res = await store.dispatch('getSubCategory', model.value.mainCategoryId)
-    model.value.subCategoryId = res.data.data[0].id
-    await store.dispatch('getAttribute', model.value.subCategoryId)
+    const res = await store.dispatch('getSubCategory', model.value.categories.mainCategoryId)
+    model.value.categories.subCategoryId = res.data.data[0].id
+    await store.dispatch('getAttribute', model.value.categories.subCategoryId)
   }
 
   const chooseSubCategory = async () => { 
-    await store.dispatch('getAttribute', model.value.subCategoryId)
+    await store.dispatch('getAttribute', model.value.categories.subCategoryId)
   }
 
 </script>

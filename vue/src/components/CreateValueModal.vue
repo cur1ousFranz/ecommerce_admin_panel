@@ -20,7 +20,7 @@
                             Cancel
                         </button>
                         <button class="px-3 py-2 bg-gray-900 text-white text-sm" type="button" @click="confirmValueModal">
-                            Create
+                            Confirm
                         </button>
                     </div>
                 </footer>
