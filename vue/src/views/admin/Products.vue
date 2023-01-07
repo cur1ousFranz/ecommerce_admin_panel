@@ -107,8 +107,8 @@
             </div>
             <div class="w-full grid grid-cols-1 py-2 gap-x-5 md:grid-cols-2">
               <div v-for="attribute in model.attributes.attributeList" :key="attribute.id">
-                <div class="space-y-2" v-if="attribute.name === 'Color'">
-                  <label>Color: <span class="text-gray-700 font-semibold">{{ model.details.color }}</span></label>
+                <div id="color" class="space-y-2 relative" v-if="attribute.name === 'Color'">
+                  <label class="mt-5 inline-block">Color: <span class="text-gray-700 font-semibold mt-4">{{ model.details.color }}</span></label>
                   <div class="grid grid-cols-8">
                     <Color @click="selectColor('yellow')" color="yellow" :currentColor="model.details.color" circleColor="text-yellow-500"/>
                     <Color @click="selectColor('green')" color="green" :currentColor="model.details.color" circleColor="text-green-500"/>
@@ -123,17 +123,17 @@
                     <Color @click="selectColor('brown')" color="brown" :currentColor="model.details.color" circleColor="text-amber-600"/>
                   </div>
                 </div>
-                <div v-if="attribute.name === 'Size'">
-                  <h1 class="text-gray-800">Size</h1>
-                  <div class="grid grid-cols-8 gap-2">
+                <div id="size" class="relative" v-if="attribute.name === 'Size'">
+                  <h1 class="text-gray-800 mt-5">Size</h1>
+                  <div class="grid grid-cols-4 lg:grid-cols-8 gap-2">
                     <Size v-for="size in model.sizes.sizeList" :key="size" 
                     @click="showSizeModal(size.name)" :size="size" />
                   </div>
                 </div>
-                <div v-if="attribute.name !== 'Color' && attribute.name !== 'Size'">
+                <div v-if="attribute.name !== 'Color' && attribute.name !== 'Size'" class="relative">
                   <div class="flex justify-between">
-                    <label :for="attribute.name">{{ attribute.name }}</label>
-                    <button @click="showValueModal(attribute.name, attribute.id)">
+                    <label :for="attribute.name" class="mt-5">{{ attribute.name }}</label>
+                    <button @click="showValueModal(attribute.name, attribute.id)" class="mt-4">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                       class="bi bi-plus-circle mt-2" viewBox="0 0 16 16">
                         <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
@@ -141,28 +141,48 @@
                       </svg>
                     </button>
                   </div>
-                  <!-- TODO | LOOP VALUES ON SPECIFIC ATTRIBUTE -->
-                  <select :id="attribute.name" class=' w-full py-2 border px-2 my-2'>
+                  <select @change="selectAttributeValue" :id="attribute.name" 
+                  class='attribute w-full py-2 border px-2 mt-2'>
                     <option selected disabled>Select</option>
-                    <option v-for="value in attribute.values" :key="value.id" :value="value.name">{{ value.name }}</option>
+                    <option v-for="value in attribute.values" :key="value.id" :value="value.name">
+                      {{ value.name }}
+                    </option>
                   </select>
                 </div>
               </div>
             </div>
 
             <div class="mb-6 space-x-6">
-              <h1 class="font-semibold  mt-3">Product Image</h1>
-              <label for="image" class="cursor-pointer">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="92" height="92" fill="currentColor" class="bi bi-plus border border-gray-900 py-5 px-5" viewBox="0 0 16 16">
-                  <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-                  </svg>
-              </label>
-              <input id="image" type="file" class='w-2 py-2 border px-2' hidden>
+              <h1 class="font-semibold  my-4">Product Image 
+                ( {{ model.images.imageBase64.length }}/6 ) 
+                <span class="text-gray-600 font-light">Recommended Size ( 600 x 799 )</span>
+              </h1>
+              <div class="grid gap-2 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+                
+                <div v-for="(image, index) in model.images.imageBase64" :key="image" class="relative">
+                  <img :src="image" class="border shadow-md mt-1" 
+                  style="min-height: 112px; min-width: 112px; max-height: 112px; max-width: 112px" :alt="image">
+                  <span @click="removeImage(index)" class="absolute -mt-28 ml-24 cursor-pointer hover:text-red-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-square" viewBox="0 0 16 16">
+                      <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                      <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                    </svg>
+                  </span>
+                </div>
+                <div v-if="model.images.imageBase64.length < 6">
+                  <label for="image" class="cursor-pointer">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="112" height="112" fill="currentColor" class="bi bi-plus border border-gray-900 py-5 px-5" viewBox="0 0 16 16">
+                      <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                      </svg>
+                  </label>
+                  <input @change="chooseImage" id="image" type="file" class='w-2 py-2 border px-2' hidden multiple>
+                </div>
+              </div>
             </div>
         </template>
 
     </ProductModal>
-    <CreateValueModal v-show="isValueModalVisible" @closeValueModal="closeValueModal" 
+    <Modal v-show="isValueModalVisible" @closeValueModal="closeValueModal" 
     @createValue="confirmCreateValue">
 
       <template v-slot:header>
@@ -176,9 +196,9 @@
         : 'w-full py-2 border px-2'" placeholder="Value">
         <p class="text-sm absolute text-red-500"> {{ model.errors.valueError }}</p>
       </template>
-    </CreateValueModal>
+    </Modal>
 
-    <CreateValueModal v-show="isSizeModalVisible" @closeValueModal="closeSizeModal" 
+    <Modal v-show="isSizeModalVisible" @closeValueModal="closeSizeModal" 
     @createValue="confirmSelectSize">
 
       <template v-slot:header>
@@ -186,11 +206,10 @@
       </template>
 
       <template v-slot:body>
-        <input v-model="model.sizes.totalOfSize" type="text" :class="model.errors.sizeError
-          ? 'w-full py-2 border border-red-500 focus:outline-red-500 px-2' 
-          : 'w-full py-2 border px-2'" v-on:keypress="numberkey" placeholder="Total" min="0" maxlength="3">
+        <input v-model="model.sizes.totalOfSize" type="text" class="w-full py-2 border px-2" 
+        v-on:keypress="numberkey" placeholder="Total" min="0" maxlength="3">
       </template>
-    </CreateValueModal>
+    </Modal>
 
   </div>
 </template>
@@ -202,7 +221,7 @@ import alert from '../../alert.js'
 import numberkey from '../../numberkey.js'
 import store from '../../store'
 import ProductModal from '../../components/ProductModal.vue'
-import CreateValueModal from '../../components/CreateValueModal.vue'
+import Modal from '../../components/Modal.vue'
 import Color from '../../components/Icons/Color.vue'
 import Size from '../../components/Icons/Size.vue'
 
@@ -216,7 +235,7 @@ import Size from '../../components/Icons/Size.vue'
       description : '',
       price : '',
       qty_stock : '',
-      color : 'yellow',
+      color : '',
     },
     categories : {
       mainCategoryId : 1,
@@ -224,7 +243,8 @@ import Size from '../../components/Icons/Size.vue'
     },
     attributes : {
       attributeId : 4,
-      attributeList : null,
+      attributeList : [],
+      attributeListValue : [],
       attributeName : '',
       newAttributeValue : '',
     },
@@ -240,6 +260,9 @@ import Size from '../../components/Icons/Size.vue'
       selectedSize : '',
       totalOfSize : 0,
     },
+    images : {
+      imageBase64: [],
+    },
     errors : {
       valueError : '',
       sizeError : ''
@@ -252,9 +275,7 @@ import Size from '../../components/Icons/Size.vue'
 
   watch(() => store.state.categories.attribute,
     (newVal, oldVal) => {
-        model.value.attributes.attributeList = {
-          ...JSON.parse(JSON.stringify(newVal)),
-        }
+        model.value.attributes.attributeList = newVal
       }
   )
 
@@ -282,16 +303,64 @@ import Size from '../../components/Icons/Size.vue'
     const size = model.value.sizes.selectedSize
     model.value.sizes.sizeList.forEach(obj => {
         if(obj.name === size){
-          obj.count = parseInt(model.value.sizes.totalOfSize)
+          obj.count = model.value.sizes.totalOfSize != 0 ? parseInt(model.value.sizes.totalOfSize) : 0
         }
     })
-    model.value.sizes.totalOfSize = 0
-    model.value.sizes.selectedSize = ''
     closeSizeModal()
+    model.value.sizes.selectedSize = ''
+    model.value.sizes.totalOfSize = 0
   }
 
   const confirmCreateProduct = () => {
-    console.log('confirmed')
+    const errors = document.querySelectorAll('.error')
+    errors.forEach(element => {
+      element.remove()
+    })
+    const attributes = document.querySelectorAll('.attribute')
+    attributes.forEach(element   => {
+      if(element.value == 'Select'){
+        element.classList.add('border-red-500')
+        let parent = element.parentElement
+        const paragraph = document.createElement("p");
+        paragraph.classList = 'error absolute text-red-500 text-sm'
+        const node = document.createTextNode(`${element.id} is required.`);
+        paragraph.appendChild(node);
+        parent.appendChild(paragraph);
+      }else{
+        element.classList.remove('border-red-500')
+      }
+    })
+    
+    // Validate if there is attribute "Size" and if 
+    // user already selected sizes
+    const array = model.value.attributes.attributeList
+    let exist = false
+    let select = false
+    array.forEach(element => element.name === 'Size' ? exist = true : '')
+    
+    if(exist){
+      model.value.sizes.sizeList.forEach(el => el.count != 0 ? select = true : '')
+    }
+
+    if(!select){
+      let element = document.querySelector('#size')
+      const paragraph = document.createElement("p");
+      paragraph.classList = 'error absolute text-red-500 text-sm'
+      const node = document.createTextNode(`Size is required.`);
+      paragraph.appendChild(node);
+      element.appendChild(paragraph);
+    }
+
+    // Validate if color is already selected
+    if(model.value.details.color === ''){
+      let element = document.querySelector('#color')
+      const paragraph = document.createElement("p");
+      paragraph.classList = 'error absolute text-red-500 text-sm'
+      const node = document.createTextNode(`Color is required.`);
+      paragraph.appendChild(node);
+      element.appendChild(paragraph);
+    }
+
   }
 
   const confirmCreateValue = async () => {
@@ -311,8 +380,15 @@ import Size from '../../components/Icons/Size.vue'
   }
 
   const selectColor = (color) => model.value.details.color = color
-  const selectSize = (size) => model.value.sizes.selectedSize = size
+  const selectSize = (size) => {
+    model.value.sizes.selectedSize = size
+    model.value.sizes.sizeList.forEach(obj => {
+      if(obj.name === size){
+        model.value.sizes.totalOfSize = obj.count
+      }
+    })
 
+  }
   const chooseCategory = async () => { 
     const res = await store.dispatch('getSubCategory', model.value.categories.mainCategoryId)
     model.value.categories.subCategoryId = res.data.data[0].id
@@ -321,6 +397,43 @@ import Size from '../../components/Icons/Size.vue'
 
   const chooseSubCategory = async () => { 
     await store.dispatch('getAttribute', model.value.categories.subCategoryId)
+    model.value.attributes.attributeListValue = []
+  }
+
+  const chooseImage = () => {
+    let image = document.querySelector('#image')
+    for (let index = 0; index < image.files.length; index++) {
+      let file = image.files[index]
+      let reader = new FileReader();
+      reader.onloadend = () => {
+        if(model.value.images.imageBase64.length < 6){
+          model.value.images.imageBase64.push(reader.result);
+        }
+      }
+      reader.readAsDataURL(file);
+    }
+  }
+
+  const removeImage = (index) => {
+    model.value.images.imageBase64.splice(index, 1)
+  }
+
+  const selectAttributeValue = (event) => {
+    let property = event.target.id
+    let value = event.target.value
+    let exist = false
+
+    model.value.attributes.attributeListValue.forEach(element => {
+      if(element.name === property){
+        element.value = value
+        exist = true
+      }
+    })
+
+    if(!exist){
+      model.value.attributes.attributeListValue.push({ name : property, value : value})
+    }
+
   }
 
 </script>
