@@ -16,29 +16,45 @@ const store = createStore({
       mainCategory : null,
       subCategory : null,
       attribute : null,
-    }
+    },
+    products : {
+      data : null,
+      loading : false,
+    },
 
   },
   getters: {},
   actions: {
     // ADMIN
+    async getAllProducts({commit}, formData) {
+      commit('setProductLoading', true)
+      const res = await axiosClient.get(`/product`);
+      commit('setProductLoading', false)
+      commit('setProductData', res.data)
+      return res
+    },
+    async createProduct({commit}, formData) {
+        const res = await axiosClient.post(`/product`, formData);
+        commit('setProductData', res.data)
+        return res
+    },
     async createValue({commit}, formData) {
         const res = await axiosClient.post(`/attribute`, formData);
         commit('setAttribute', res.data)
         return res
     },
     async getAttribute({commit}, id) {
-        const res = await axiosClient.get(`/product/category/${id}/attribute`);
+        const res = await axiosClient.get(`/category/${id}/attribute`);
         commit('setAttribute', res.data)
         return res
     },
     async getSubCategory({commit}, id) {
-        const res = await axiosClient.get(`/product/category/${id}`);
+        const res = await axiosClient.get(`/category/${id}`);
         commit('setSubCategory', res.data)
         return res
     },
     async getMainCategory({commit}) {
-        const res = await axiosClient.get(`/product/category`);
+        const res = await axiosClient.get(`/category`);
         commit('setMainCategory', res.data)
         return res
     },
@@ -64,6 +80,13 @@ const store = createStore({
     },
   },
   mutations: {
+    // PRODUCTS
+    setProductLoading : (state, loading) => {
+      state.products.loading = loading
+    },
+    setProductData : (state, product) => {
+      state.products.data = product.data
+    },
     // ADMIN
     setAttribute : (state, attribute) => {
       state.categories.attribute = attribute.data

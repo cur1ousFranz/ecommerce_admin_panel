@@ -15,7 +15,7 @@
         </div>
         <div class="flex space-x-3">
             <input type="text" class=' py-2 border px-2' placeholder="Search">
-            <button @click="showModal" class="px-3 py-2 space-x-2 bg-gray-800 text-sm text-white hover:bg-gray-700">
+            <button @click="showProductModal" class="px-3 py-2 space-x-2 bg-gray-800 text-sm text-white hover:bg-gray-700">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="inline-block bi bi-plus-square" viewBox="0 0 16 16">
                 <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
                 <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
@@ -44,7 +44,7 @@
         </tr>
       </tbody>
     </table>
-    <ProductModal v-show="isModalVisible" @close="closeModal" @some-event="confirmCreateProduct" >
+    <ProductModal v-show="isModalVisible" @close="closeProductModal" @some-event="confirmCreateProduct" >
         <template v-slot:header>
           Create Product
         </template>
@@ -54,24 +54,33 @@
                 <h1 class="font-semibold ">Details</h1>
             </div>
             <div class="w-full py-2 flex flex-col space-x-0 md:space-x-6 md:flex-row">
-                <div class="w-full space-y-2">
-                    <div class="space-y-2">
+                <div class="w-full space-y-4">
+                    <div class="relative">
                         <label for="sku">SKU</label>
-                        <input id="sku" type="text" class='w-full py-2 border px-2' placeholder="Ex. TSH-FFF-M">
+                        <input v-model="model.details.sku" id="sku" type="text" 
+                        :class=" model.errors.sku ? 'w-full py-2 border border-red-500 focus:outline-red-500 px-2' : 'w-full py-2 border px-2'"
+                         placeholder="Ex. TSH-FFF-M">
+                        <p class="text-sm absolute text-red-500"> {{ model.errors.sku }}</p>
                     </div>
-                    <div class="space-y-2">
+                    <div class="relative">
                         <label for="name">Name</label>
-                        <input id="name" type="text" class='w-full py-2 border px-2' placeholder="Ex. Oxygn Apparrel">
+                        <input v-model="model.details.name" id="name" type="text" 
+                        :class=" model.errors.name ? 'w-full py-2 border border-red-500 focus:outline-red-500 px-2' : 'w-full py-2 border px-2'" placeholder="Ex. Oxygn Apparrel">
+                        <p class="text-sm absolute text-red-500"> {{ model.errors.name }}</p>
                     </div>
                 </div>
-                <div class="w-full space-y-2">
-                  <div class="space-y-2">
+                <div class="w-full space-y-4">
+                  <div class="relative">
                       <label for="price">Price</label>
-                      <input v-on:keypress="numberkey" id="price" type="text" class='w-full py-2 border px-2' placeholder="₱" maxlength="10">
+                      <input v-model="model.details.price" v-on:keypress="numberkey" id="price" type="text" 
+                      :class=" model.errors.price ? 'w-full py-2 border border-red-500 focus:outline-red-500 px-2' : 'w-full py-2 border px-2'" placeholder="₱" maxlength="10">
+                      <p class="text-sm absolute text-red-500"> {{ model.errors.price }}</p>
                   </div>
-                  <div class="space-y-2">
+                  <div class="relative">
                     <label for="qty_stock">Qty Stock (All Sizes)</label>
-                    <input v-on:keypress="numberkey" id="qty_stock" type="text" class='w-full py-2 border px-2' placeholder="Ex. 10" maxlength="10">
+                    <input v-model="model.details.qty_stock" v-on:keypress="numberkey" id="qty_stock" type="text" 
+                    :class=" model.errors.qty_stock ? 'w-full py-2 border border-red-500 focus:outline-red-500 px-2' : 'w-full py-2 border px-2'" placeholder="Ex. 10" maxlength="10">
+                    <p class="text-sm absolute text-red-500"> {{ model.errors.qty_stock }}</p>
                   </div>
                 </div>
             </div>
@@ -152,7 +161,7 @@
               </div>
             </div>
 
-            <div class="mb-6 space-x-6">
+            <div id="imageSelect" class="relative mb-6 space-x-6">
               <h1 class="font-semibold  my-4">Product Image 
                 ( {{ model.images.imageBase64.length }}/6 ) 
                 <span class="text-gray-600 font-light">Recommended Size ( 600 x 799 )</span>
@@ -175,7 +184,8 @@
                       <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
                       </svg>
                   </label>
-                  <input @change="chooseImage" id="image" type="file" class='w-2 py-2 border px-2' hidden multiple>
+                  <input @change="chooseImage" id="image" type="file" 
+                  class='w-2 py-2 border px-2' accept="image/png, image/jpeg, image/webp" hidden multiple>
                 </div>
               </div>
             </div>
@@ -210,7 +220,8 @@
         v-on:keypress="numberkey" placeholder="Total" min="0" maxlength="3">
       </template>
     </Modal>
-
+    <!-- TODO:: DISPLAY PRODUCTS -->
+    <pre>{{ model.products.productList}}</pre>
   </div>
 </template>
 
@@ -232,7 +243,6 @@ import Size from '../../components/Icons/Size.vue'
     details : {
       sku : '',
       name : '',
-      description : '',
       price : '',
       qty_stock : '',
       color : '',
@@ -262,10 +272,17 @@ import Size from '../../components/Icons/Size.vue'
     },
     images : {
       imageBase64: [],
+      productImages: [],
+    },
+    products : {
+      productList : []
     },
     errors : {
       valueError : '',
-      sizeError : ''
+      sku : '',
+      name : '',
+      price : '',
+      qty_stock : '',
     },
     
   })
@@ -279,10 +296,17 @@ import Size from '../../components/Icons/Size.vue'
       }
   )
 
+  watch(() => store.state.products.data,
+    (newVal, oldVal) => {
+        model.value.products.productList = newVal
+      }
+  )
+
   onMounted(async () => {
     await store.dispatch('getMainCategory')
     await store.dispatch('getSubCategory', model.value.categories.mainCategoryId)
     await store.dispatch('getAttribute', model.value.categories.subCategoryId)
+    await store.dispatch('getAllProducts')
   })
 
   const showSizeModal = (size) => {
@@ -290,8 +314,8 @@ import Size from '../../components/Icons/Size.vue'
     selectSize(size)
   }
   const closeSizeModal = () => isSizeModalVisible.value = false
-  const showModal = () => isModalVisible.value = true
-  const closeModal = () => isModalVisible.value = false
+  const showProductModal = () => isModalVisible.value = true
+  const closeProductModal = () => isModalVisible.value = false
   const closeValueModal = () => isValueModalVisible.value = false
   const showValueModal = (attributeName, attributeId) => {
     isValueModalVisible.value = true
@@ -311,14 +335,23 @@ import Size from '../../components/Icons/Size.vue'
     model.value.sizes.totalOfSize = 0
   }
 
-  const confirmCreateProduct = () => {
+  const confirmCreateProduct = async () => {
+
+    // Removing all errors
     const errors = document.querySelectorAll('.error')
-    errors.forEach(element => {
-      element.remove()
-    })
+    errors.forEach(element => element.remove())
+    model.value.errors.name = ''
+    model.value.errors.sku = ''
+    model.value.errors.qty_stock = ''
+    model.value.errors.price = ''
+
+    // Validate all attributes if all fields are selected
     const attributes = document.querySelectorAll('.attribute')
+    let attributeSelected = false
+
     attributes.forEach(element   => {
       if(element.value == 'Select'){
+        attributeSelected = false
         element.classList.add('border-red-500')
         let parent = element.parentElement
         const paragraph = document.createElement("p");
@@ -328,6 +361,7 @@ import Size from '../../components/Icons/Size.vue'
         parent.appendChild(paragraph);
       }else{
         element.classList.remove('border-red-500')
+        attributeSelected = true
       }
     })
     
@@ -335,14 +369,12 @@ import Size from '../../components/Icons/Size.vue'
     // user already selected sizes
     const array = model.value.attributes.attributeList
     let exist = false
-    let select = false
-    array.forEach(element => element.name === 'Size' ? exist = true : '')
+    let sizeSelected = false
+    array.forEach(el => el.name === 'Size' ? exist = true : '')
     
-    if(exist){
-      model.value.sizes.sizeList.forEach(el => el.count != 0 ? select = true : '')
-    }
+    if(exist) model.value.sizes.sizeList.forEach(el => el.count != 0 ? sizeSelected = true : '')
 
-    if(!select){
+    if(!sizeSelected){
       let element = document.querySelector('#size')
       const paragraph = document.createElement("p");
       paragraph.classList = 'error absolute text-red-500 text-sm'
@@ -351,14 +383,90 @@ import Size from '../../components/Icons/Size.vue'
       element.appendChild(paragraph);
     }
 
-    // Validate if color is already selected
+    // Validate if there is color selected
+    let colorSelected = true
     if(model.value.details.color === ''){
+      colorSelected = false
       let element = document.querySelector('#color')
       const paragraph = document.createElement("p");
       paragraph.classList = 'error absolute text-red-500 text-sm'
       const node = document.createTextNode(`Color is required.`);
       paragraph.appendChild(node);
       element.appendChild(paragraph);
+    }
+
+    // Validate if there are images uploaded
+    let imageSelected = false
+    if(model.value.images.imageBase64.length < 2){
+      let element = document.querySelector('#imageSelect')
+      const paragraph = document.createElement("p");
+      paragraph.classList = 'error absolute text-red-500 text-sm'
+      const node = document.createTextNode(`Must atleast 2 images.`);
+      paragraph.appendChild(node);
+      element.appendChild(paragraph);
+    }else{
+      imageSelected = true
+    }
+    
+    // Validate qty stock if equal with sizes count
+    let qtyStockSizeEqual = false
+    let total = 0
+    model.value.sizes.sizeList.forEach(el => total += el.count)
+    console.log(total);
+    if(total != model.value.details.qty_stock && sizeSelected){
+      let element = document.querySelector('#size')
+      const paragraph = document.createElement("p");
+      paragraph.classList = 'error absolute text-red-500 text-sm'
+      const node = document.createTextNode(`Sizes total must equal in Qty Stock.`);
+      paragraph.appendChild(node);
+      element.appendChild(paragraph);
+    } else{
+      qtyStockSizeEqual = true
+    }
+    
+    try {
+      if(attributeSelected && sizeSelected && colorSelected && imageSelected && qtyStockSizeEqual){
+        const attributeObj = {}
+        attributes.forEach(element => attributeObj[element.id] = element.value)
+        attributeObj.color = model.value.details.color
+        attributeObj.size = model.value.sizes.sizeList
+
+        const formData = new FormData()
+        model.value.images.productImages.forEach(element => formData.append('product_image[]', element))
+
+        formData.append('category_id', model.value.categories.subCategoryId)
+        formData.append('name', model.value.details.name)
+        formData.append('description', JSON.stringify(attributeObj)) 
+        formData.append('sku', model.value.details.sku)
+        formData.append('qty_stock', model.value.details.qty_stock)
+        formData.append('price', model.value.details.price)
+        const res = await store.dispatch('createProduct', formData)
+
+        // Reset fields after success creating product
+        model.value.details.sku = ''
+        model.value.details.name = ''
+        model.value.details.price = ''
+        model.value.details.qty_stock = ''
+        model.value.details.color = ''
+        model.value.images.imageBase64 = []
+        model.value.images.productImages = []
+        model.value.sizes.sizeList.forEach(el => el.count = 0)
+        alert('Product created success!')
+        closeProductModal()
+      }
+    } catch (err) {
+      if (err.response.data.errors.hasOwnProperty('sku')) {
+        model.value.errors.sku = err.response.data.errors.sku[0]
+      }
+      if(err.response.data.errors.hasOwnProperty('name')){
+        model.value.errors.name = err.response.data.errors.name[0]
+      }
+      if(err.response.data.errors.hasOwnProperty('qty_stock')){
+        model.value.errors.qty_stock = err.response.data.errors.qty_stock[0]
+      }
+      if(err.response.data.errors.hasOwnProperty('price')){
+        model.value.errors.price = err.response.data.errors.price[0]
+      }
     }
 
   }
@@ -404,18 +512,22 @@ import Size from '../../components/Icons/Size.vue'
     let image = document.querySelector('#image')
     for (let index = 0; index < image.files.length; index++) {
       let file = image.files[index]
-      let reader = new FileReader();
-      reader.onloadend = () => {
-        if(model.value.images.imageBase64.length < 6){
-          model.value.images.imageBase64.push(reader.result);
+      if(file.type === 'image/png' || file.type === 'image/webp' || file.type === 'image/jpeg'){
+        let reader = new FileReader();
+        reader.onloadend = () => {
+          if(model.value.images.imageBase64.length < 6){
+            model.value.images.imageBase64.push(reader.result);
+          }
         }
+        reader.readAsDataURL(file);
       }
-      reader.readAsDataURL(file);
+      model.value.images.productImages.push(file);
     }
   }
 
   const removeImage = (index) => {
     model.value.images.imageBase64.splice(index, 1)
+    model.value.images.productImages.splice(index, 1)
   }
 
   const selectAttributeValue = (event) => {
