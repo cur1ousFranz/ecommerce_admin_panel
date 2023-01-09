@@ -94,7 +94,7 @@
           <div v-if="authenticated" class="relative inline-block text-left">
             <div>
               <span class="rounded-md shadow-sm">
-                <button @click="showDropdown" type="button" class="inline-flex justify-center w-full rounded-full border-gray-300 px-3 py-1 bg-white text-sm leading-5 font-medium text-gray-700 hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-50 active:text-gray-800 transition duration-150 ease-in-out">
+                <button @click="showDropdown" type="button" class="inline-flex justify-center w-full rounded-full px-3 py-1 text-sm leading-5 font-medium text-gray-700 hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-50 active:text-gray-800 transition duration-150 ease-in-out">
                    <img src="/img/profile-default.png" class="w-7" alt="">
                 </button>
               </span>

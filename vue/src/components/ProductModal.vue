@@ -20,7 +20,8 @@
                             Cancel
                         </button>
                         <button class="px-3 py-2 bg-gray-900 text-white text-sm" type="button" @click="confirm">
-                            Confirm
+                            <span v-if="loading">Loading...</span>
+                            <span v-if="!loading">Confirm</span>
                         </button>
                     </div>
                 </footer>
@@ -32,6 +33,11 @@
 <script>
   export default {
     name: 'Modal',
+    props: {
+        loading: {
+            type: Boolean,
+        },
+    },
     methods: {
       close() {
         this.$emit('close');

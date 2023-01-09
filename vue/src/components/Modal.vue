@@ -16,10 +16,10 @@
 
                 <footer class="modal-footer mt-3">
                     <div class="flex justify-end space-x-3">
-                        <button class="px-3 py-2 border border-gray-900 text-gray-900 text-sm" type="button" @click="closeValueModal" >
+                        <button class="px-3 py-2 border border-gray-900 text-gray-900 text-sm" type="button" @click="closeModal" >
                             Cancel
                         </button>
-                        <button class="px-3 py-2 bg-gray-900 text-white text-sm" type="button" @click="confirmValueModal">
+                        <button class="px-3 py-2 bg-gray-900 text-white text-sm" type="button" @click="confirmModal">
                             Confirm
                         </button>
                     </div>
@@ -33,11 +33,11 @@
   export default {
     name: 'Modal',
     methods: {
-      closeValueModal() {
-        this.$emit('closeValueModal');
+      closeModal() {
+        this.$emit('closeModal');
       },
-      confirmValueModal() {
-        this.$emit('createValue')
+      confirmModal() {
+        this.$emit('confirmModal')
       },
     },
   };

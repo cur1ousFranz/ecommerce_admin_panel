@@ -4,10 +4,10 @@
         <div>
             <p>Show 
                 <span>
-                    <select name="" id="" class="border px-2">
-                        <option value="">10</option>
-                        <option value="">20</option>
-                        <option value="">30</option>
+                    <select v-model="model.entries.currentEntry"  class="border px-2">
+                        <option v-for="entry in model.entries.showEntries" :key="entry" :value="entry">
+                          {{ entry }}
+                        </option>
                     </select>
                 </span>
                 Entries
@@ -34,17 +34,76 @@
           <th scope="col" class="py-3 px-6">Sale Price</th>
         </tr>
       </thead>
-      <tbody class="text-center">
+      <tbody v-if="productsLoading">
+        <tr class="text-center">
+          <td colspan="5">
+            Loading...
+          </td>
+        </tr>
+      </tbody>
+      <tbody v-if="model.products.productList.length" class="text-center">
+        <tr v-for="product in model.products.productList.data" :key="product.id" class="hover:bg-gray-200">
+          <td class="py-2">{{ product.product_item.sku }}</td>
+          <td class="py-2">{{ product.name }}</td>
+          <td class="py-2">{{ product.product_item.qty_stock }}</td>
+          <td class="py-2">{{ product.product_item.price }}</td>
+          <td class="py-2 relative flex justify-center">
+            {{ product.product_item.sale_price ?? 0  }}
+            <div class="absolute ml-44">
+              <div class="relative inline-block text-left">
+                <button class="text-gray-400 hover:text-gray-900" @click="showDotDropdown(product.id)">
+                  <span class="inline-block">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots-vertical" viewBox="0 0 16 16">
+                      <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                    </svg>
+                  </span>
+                </button>
+                <div :id="product.id" class="dot-dropdown absolute right-0 z-10 border w-36 rounded-md shadow-lg hidden">
+                  <div class="rounded-md bg-white shadow-xs text-center">
+                    <div class="flex justify-start px-4 py-2 space-x-2 w-full hover:bg-gray-200 hover:text-black">
+                      <!-- EDIT BUTTON -->
+                      <button class="flex space-x-2 w-full">
+                        <span class="mt-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                            <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                          </svg>
+                        </span>
+                        <p>Edit</p>
+                      </button>
+                    </div>
+                    <div class="flex justify-start px-4 py-2 space-x-2 w-full hover:bg-gray-200 hover:text-black">
+                        <!-- DELETE BUTTON -->
+                       <button @click="showDeleteProductModal(product.id)" class="flex space-x-2 w-full">
+                        <span class="mt-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                            <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                          </svg>
+                        </span>
+                        <p>Delete</p>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+      <tbody v-if="!model.products.productList.length && !productsLoading">
         <tr>
-          <td>sho/us-/yes/no</td>
-          <td>Jordan 21</td>
-          <td>10</td>
-          <td>₱ 1,200</td>
-          <td>0</td>
+          <td colspan="5" class="text-center py-2">
+            No products yet.
+          </td>
         </tr>
       </tbody>
     </table>
-    <ProductModal v-show="isModalVisible" @close="closeProductModal" @some-event="confirmCreateProduct" >
+    <div class="flex justify-end py-1">
+      <Pagination :pagination="model.products.productList" @paginate="view" :offset="4"></Pagination>
+    </div>
+    <ProductModal v-show="isModalVisible" @close="closeProductModal" @some-event="confirmCreateProduct" 
+    :loading="createProductLoading">
         <template v-slot:header>
           Create Product
         </template>
@@ -192,8 +251,8 @@
         </template>
 
     </ProductModal>
-    <Modal v-show="isValueModalVisible" @closeValueModal="closeValueModal" 
-    @createValue="confirmCreateValue">
+    <Modal v-show="isValueModalVisible" @closeModal="closeValueModal" 
+    @confirmModal="confirmCreateValue">
 
       <template v-slot:header>
         Create {{ model.attributes.attributeName }} Value
@@ -208,8 +267,8 @@
       </template>
     </Modal>
 
-    <Modal v-show="isSizeModalVisible" @closeValueModal="closeSizeModal" 
-    @createValue="confirmSelectSize">
+    <Modal v-show="isSizeModalVisible" @closeModal="closeSizeModal" 
+    @confirmModal="confirmSelectSize">
 
       <template v-slot:header>
         Enter total of {{ model.sizes.selectedSize }} size
@@ -220,8 +279,27 @@
         v-on:keypress="numberkey" placeholder="Total" min="0" maxlength="3">
       </template>
     </Modal>
-    <!-- TODO:: DISPLAY PRODUCTS -->
-    <pre>{{ model.products.productList}}</pre>
+
+    <Modal v-show="isDeleteModalVisible" @closeModal="closeDeleteProductModal" @confirmModal="confirmDeleteProduct(model.products.currentProduct.id)">
+      <template v-slot:header>
+       <span class="inline-block">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-trash text-red-500" viewBox="0 0 16 16">
+          <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+          <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+        </svg>
+        </span> 
+        Delete
+      </template>
+
+      <template v-slot:body>
+        <p class="text-lg text-center">
+          You want to permanently deleted this product with <br> 
+         SKU: <span class="font-semibold italic"  v-if="model.products.currentProduct">
+          {{ model.products.currentProduct.product_item.sku  }}</span> ?
+        </p>
+      </template>
+    </Modal>
+    <!-- TODO:: ALWAYS FETCH THE CURRENT NUMBER OF ENTRIES -->
   </div>
 </template>
 
@@ -229,9 +307,11 @@
 import { ref } from '@vue/reactivity'
 import { computed, onMounted, watch } from '@vue/runtime-core'
 import alert from '../../alert.js'
+import axiosClient from '../../axios'
 import numberkey from '../../numberkey.js'
 import store from '../../store'
 import ProductModal from '../../components/ProductModal.vue'
+import Pagination from '../../components/Pagination.vue'
 import Modal from '../../components/Modal.vue'
 import Color from '../../components/Icons/Color.vue'
 import Size from '../../components/Icons/Size.vue'
@@ -239,6 +319,7 @@ import Size from '../../components/Icons/Size.vue'
   const isModalVisible = ref(false)
   const isValueModalVisible = ref(false)
   const isSizeModalVisible = ref(false)
+  const isDeleteModalVisible = ref(false)
   const model = ref({
     details : {
       sku : '',
@@ -275,7 +356,12 @@ import Size from '../../components/Icons/Size.vue'
       productImages: [],
     },
     products : {
-      productList : []
+      productList : [],
+      currentProduct : ''
+    },
+    entries : {
+      showEntries : [10, 25, 50, 100],
+      currentEntry : 10,
     },
     errors : {
       valueError : '',
@@ -289,17 +375,19 @@ import Size from '../../components/Icons/Size.vue'
 
   const mainCategories = computed(() => store.state.categories.mainCategory)
   const subCategories = computed(() => store.state.categories.subCategory)
+  const productsLoading = computed(() => store.state.products.loading)
+  const createProductLoading = computed(() => store.state.products.createProductLoading)
 
   watch(() => store.state.categories.attribute,
-    (newVal, oldVal) => {
-        model.value.attributes.attributeList = newVal
-      }
+    (newVal, oldVal) => model.value.attributes.attributeList = newVal
   )
 
   watch(() => store.state.products.data,
-    (newVal, oldVal) => {
-        model.value.products.productList = newVal
-      }
+    (newVal, oldVal) => model.value.products.productList = newVal
+  )
+
+  watch(() => store.state.products.currentProduct,
+    (newVal, oldVal) =>  model.value.products.currentProduct = newVal
   )
 
   onMounted(async () => {
@@ -309,6 +397,7 @@ import Size from '../../components/Icons/Size.vue'
     await store.dispatch('getAllProducts')
   })
 
+  // MODALS
   const showSizeModal = (size) => {
     isSizeModalVisible.value = true
     selectSize(size)
@@ -322,7 +411,25 @@ import Size from '../../components/Icons/Size.vue'
     model.value.attributes.attributeName = attributeName
     model.value.attributes.attributeId = attributeId
   }
+  const showDeleteProductModal = async (id) => {
+    isDeleteModalVisible.value = true
+    const dropdown = document.getElementById(`${id}`)
+    dropdown.classList.add('hidden')
+    await store.dispatch('getProduct', id)
+  }
+  const closeDeleteProductModal = () => isDeleteModalVisible.value = false
+  const confirmDeleteProduct = async (product_id) => {
+    if(product_id){
+      try {
+        await store.dispatch('deleteProduct', product_id)
+        isDeleteModalVisible.value = false
+        alert('Product deleted successfully!')
+      } catch (error) {
+      }
+    }
+  }
 
+  // MODAL FUNCTIONS
   const confirmSelectSize = () => {
     const size = model.value.sizes.selectedSize
     model.value.sizes.sizeList.forEach(obj => {
@@ -440,6 +547,7 @@ import Size from '../../components/Icons/Size.vue'
         formData.append('sku', model.value.details.sku)
         formData.append('qty_stock', model.value.details.qty_stock)
         formData.append('price', model.value.details.price)
+        formData.append('entry', model.value.entries.currentEntry)
         const res = await store.dispatch('createProduct', formData)
 
         // Reset fields after success creating product
@@ -467,6 +575,7 @@ import Size from '../../components/Icons/Size.vue'
       if(err.response.data.errors.hasOwnProperty('price')){
         model.value.errors.price = err.response.data.errors.price[0]
       }
+      store.state.products.createProductLoading = false
     }
 
   }
@@ -546,6 +655,38 @@ import Size from '../../components/Icons/Size.vue'
       model.value.attributes.attributeListValue.push({ name : property, value : value})
     }
 
+  }
+
+  const view = () => {
+    let current_page = model.value.products.productList.current_page
+    let pageNum = current_page ? current_page : 1
+
+    axiosClient.get(`/product/?page=${pageNum}`)
+      .then((res) => {
+        model.value.products.productList = res.data.data
+      })
+  }
+
+  const showDotDropdown = (id) => {
+    const dropdown = document.getElementById(`${id}`)
+    const dropdowns = document.querySelectorAll('.dot-dropdown')
+
+    dropdowns.forEach(element => {
+      const button = element.previousSibling
+
+      if(element.id === dropdown.id){
+        if(element.classList.contains('hidden')){
+          element.classList.remove('hidden')
+          button.classList.add('text-gray-900')
+        }else{
+          element.classList.add('hidden')
+          button.classList.remove('text-gray-900')
+        }
+      }else{
+        element.classList.add('hidden')
+        button.classList.remove('text-gray-900')
+      }
+    })
   }
 
 </script>
