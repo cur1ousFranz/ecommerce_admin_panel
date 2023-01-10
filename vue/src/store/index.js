@@ -28,17 +28,17 @@ const store = createStore({
   getters: {},
   actions: {
     // ADMIN
-    async deleteProduct({commit}, id) {
-      const res = await axiosClient.delete(`/product/${id}`);
+    async deleteProduct({commit}, formData) {
+      const res = await axiosClient.delete(`/product/${formData.get('product_id')}`, formData);
       commit('setProductData', res.data)
     },
     async getProduct({commit}, id) {
       const res = await axiosClient.get(`/product/${id}`);
       commit('setCurrentProduct', res.data)
     },
-    async getAllProducts({commit}) {
+    async getAllProducts({commit}, formData) {
       commit('setProductLoading', true)
-      const res = await axiosClient.get(`/product`);
+      const res = await axiosClient.post(`/products`, formData)
       commit('setProductLoading', false)
       commit('setProductData', res.data)
       return res

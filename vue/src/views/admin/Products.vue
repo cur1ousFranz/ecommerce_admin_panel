@@ -4,7 +4,7 @@
         <div>
             <p>Show 
                 <span>
-                    <select v-model="model.entries.currentEntry"  class="border px-2">
+                    <select @change="chooseEntry" v-model="model.entries.currentEntry"  class="border px-2">
                         <option v-for="entry in model.entries.showEntries" :key="entry" :value="entry">
                           {{ entry }}
                         </option>
@@ -15,7 +15,7 @@
         </div>
         <div class="flex space-x-3">
             <input type="text" class=' py-2 border px-2' placeholder="Search">
-            <button @click="showProductModal" class="px-3 py-2 space-x-2 bg-gray-800 text-sm text-white hover:bg-gray-700">
+            <button @click="showProductModal(false)" class="px-3 py-2 space-x-2 bg-gray-800 text-sm text-white hover:bg-gray-700">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="inline-block bi bi-plus-square" viewBox="0 0 16 16">
                 <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
                 <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
@@ -34,15 +34,8 @@
           <th scope="col" class="py-3 px-6">Sale Price</th>
         </tr>
       </thead>
-      <tbody v-if="productsLoading">
-        <tr class="text-center">
-          <td colspan="5">
-            Loading...
-          </td>
-        </tr>
-      </tbody>
-      <tbody v-if="model.products.productList.length" class="text-center">
-        <tr v-for="product in model.products.productList.data" :key="product.id" class="hover:bg-gray-200">
+      <tbody v-if="model.products.productList" class="text-center">
+        <tr v-for="product in model.products.productList.data" :key="product.id" class="hover:text-gray-900 hover:bg-gray-200">
           <td class="py-2">{{ product.product_item.sku }}</td>
           <td class="py-2">{{ product.name }}</td>
           <td class="py-2">{{ product.product_item.qty_stock }}</td>
@@ -62,7 +55,7 @@
                   <div class="rounded-md bg-white shadow-xs text-center">
                     <div class="flex justify-start px-4 py-2 space-x-2 w-full hover:bg-gray-200 hover:text-black">
                       <!-- EDIT BUTTON -->
-                      <button class="flex space-x-2 w-full">
+                      <button @click="showProductModal(true, product.id)" class="flex space-x-2 w-full">
                         <span class="mt-1">
                           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
                             <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
@@ -91,10 +84,10 @@
           </td>
         </tr>
       </tbody>
-      <tbody v-if="!model.products.productList.length && !productsLoading">
+      <tbody v-if="productsLoading">
         <tr>
-          <td colspan="5" class="text-center py-2">
-            No products yet.
+          <td colspan="5" class="py-6 text-center">
+            Loading...
           </td>
         </tr>
       </tbody>
@@ -102,155 +95,158 @@
     <div class="flex justify-end py-1">
       <Pagination :pagination="model.products.productList" @paginate="view" :offset="4"></Pagination>
     </div>
+
+    <!-- PRODUCT MODAL -->
     <ProductModal v-show="isModalVisible" @close="closeProductModal" @some-event="confirmCreateProduct" 
     :loading="createProductLoading">
         <template v-slot:header>
-          Create Product
+          Create Product {{ isEditing }}
         </template>
 
         <template v-slot:body>
-            <div>
-                <h1 class="font-semibold ">Details</h1>
-            </div>
-            <div class="w-full py-2 flex flex-col space-x-0 md:space-x-6 md:flex-row">
-                <div class="w-full space-y-4">
-                    <div class="relative">
-                        <label for="sku">SKU</label>
-                        <input v-model="model.details.sku" id="sku" type="text" 
-                        :class=" model.errors.sku ? 'w-full py-2 border border-red-500 focus:outline-red-500 px-2' : 'w-full py-2 border px-2'"
-                         placeholder="Ex. TSH-FFF-M">
-                        <p class="text-sm absolute text-red-500"> {{ model.errors.sku }}</p>
-                    </div>
-                    <div class="relative">
-                        <label for="name">Name</label>
-                        <input v-model="model.details.name" id="name" type="text" 
-                        :class=" model.errors.name ? 'w-full py-2 border border-red-500 focus:outline-red-500 px-2' : 'w-full py-2 border px-2'" placeholder="Ex. Oxygn Apparrel">
-                        <p class="text-sm absolute text-red-500"> {{ model.errors.name }}</p>
-                    </div>
+          <div>
+            <h1 class="font-semibold ">Details</h1>
+          </div>
+          <div class="w-full py-2 flex flex-col space-x-0 md:space-x-6 md:flex-row">
+            <div class="w-full space-y-4">
+                <div class="relative">
+                    <label for="sku">SKU</label>
+                    <input v-model="model.details.sku" id="sku" type="text" 
+                    :class=" model.errors.sku ? 'w-full py-2 border border-red-500 focus:outline-red-500 px-2' : 'w-full py-2 border px-2'"
+                      placeholder="Ex. TSH-FFF-M">
+                    <p class="text-sm absolute text-red-500"> {{ model.errors.sku }}</p>
                 </div>
-                <div class="w-full space-y-4">
-                  <div class="relative">
-                      <label for="price">Price</label>
-                      <input v-model="model.details.price" v-on:keypress="numberkey" id="price" type="text" 
-                      :class=" model.errors.price ? 'w-full py-2 border border-red-500 focus:outline-red-500 px-2' : 'w-full py-2 border px-2'" placeholder="₱" maxlength="10">
-                      <p class="text-sm absolute text-red-500"> {{ model.errors.price }}</p>
-                  </div>
-                  <div class="relative">
-                    <label for="qty_stock">Qty Stock (All Sizes)</label>
-                    <input v-model="model.details.qty_stock" v-on:keypress="numberkey" id="qty_stock" type="text" 
-                    :class=" model.errors.qty_stock ? 'w-full py-2 border border-red-500 focus:outline-red-500 px-2' : 'w-full py-2 border px-2'" placeholder="Ex. 10" maxlength="10">
-                    <p class="text-sm absolute text-red-500"> {{ model.errors.qty_stock }}</p>
-                  </div>
+                <div class="relative">
+                    <label for="name">Name</label>
+                    <input v-model="model.details.name" id="name" type="text" 
+                    :class=" model.errors.name ? 'w-full py-2 border border-red-500 focus:outline-red-500 px-2' : 'w-full py-2 border px-2'" placeholder="Ex. Oxygn Apparrel">
+                    <p class="text-sm absolute text-red-500"> {{ model.errors.name }}</p>
                 </div>
             </div>
-            <div>
-                <hr class="mt-4">
-                <h1 class="font-semibold my-3">Product Category</h1>
+            <div class="w-full space-y-4">
+              <div class="relative">
+                  <label for="price">Price</label>
+                  <input v-model="model.details.price" v-on:keypress="numberkey" id="price" type="text" 
+                  :class=" model.errors.price ? 'w-full py-2 border border-red-500 focus:outline-red-500 px-2' : 'w-full py-2 border px-2'" placeholder="₱" maxlength="10">
+                  <p class="text-sm absolute text-red-500"> {{ model.errors.price }}</p>
+              </div>
+              <div class="relative">
+                <label for="qty_stock">Qty Stock (All Sizes)</label>
+                <input v-model="model.details.qty_stock" v-on:keypress="numberkey" id="qty_stock" type="text" 
+                :class=" model.errors.qty_stock ? 'w-full py-2 border border-red-500 focus:outline-red-500 px-2' : 'w-full py-2 border px-2'" placeholder="Ex. 10" maxlength="10">
+                <p class="text-sm absolute text-red-500"> {{ model.errors.qty_stock }}</p>
+              </div>
             </div>
-            <div class="w-full py-2 flex flex-col space-x-0 md:space-x-6 md:flex-row">
-                <div class="w-full space-y-2">
-                  <div class="space-y-2">
-                    <label for="category">Category</label>
-                    <select @change="chooseCategory" v-model="model.categories.mainCategoryId" id="category" class='w-full py-2 border px-2'>
-                      <option v-for="category in mainCategories" :key="category.id" :value="category.id">
-                        {{ category.name }}
-                      </option>
-                    </select>
-                  </div>
-                </div>
-                <div class="w-full space-y-2">
-                  <div class="space-y-2">
-                    <label for="sub_category">Sub Category</label>
-                    <select  @change="chooseSubCategory" v-model="model.categories.subCategoryId" id="category" class='w-full py-2 border px-2'>
-                      <option v-for="category in subCategories" :key="category.id" :value="category.id" >
-                        {{ category.name }}
-                      </option>
-                    </select>
-                  </div>
-                </div>
-            </div>
-            <div>
-                <hr class="mt-4">
-                <h1 class="font-semibold my-3">Product Attributes</h1>
-            </div>
-            <div class="w-full grid grid-cols-1 py-2 gap-x-5 md:grid-cols-2">
-              <div v-for="attribute in model.attributes.attributeList" :key="attribute.id">
-                <div id="color" class="space-y-2 relative" v-if="attribute.name === 'Color'">
-                  <label class="mt-5 inline-block">Color: <span class="text-gray-700 font-semibold mt-4">{{ model.details.color }}</span></label>
-                  <div class="grid grid-cols-8">
-                    <Color @click="selectColor('yellow')" color="yellow" :currentColor="model.details.color" circleColor="text-yellow-500"/>
-                    <Color @click="selectColor('green')" color="green" :currentColor="model.details.color" circleColor="text-green-500"/>
-                    <Color @click="selectColor('blue')" color="blue" :currentColor="model.details.color" circleColor="text-blue-500"/>
-                    <Color @click="selectColor('violet')" color="violet" :currentColor="model.details.color" circleColor="text-violet-500"/>
-                    <Color @click="selectColor('red')" color="red" :currentColor="model.details.color" circleColor="text-red-600"/>
-                    <Color @click="selectColor('orange')" color="orange" :currentColor="model.details.color" circleColor="text-orange-500"/>
-                    <Color @click="selectColor('gray')" color="gray" :currentColor="model.details.color" circleColor="text-gray-500"/>
-                    <Color @click="selectColor('pink')" color="pink" :currentColor="model.details.color" circleColor="text-pink-500"/>
-                    <Color @click="selectColor('black')" color="black" :currentColor="model.details.color" circleColor="text-black"/>
-                    <Color @click="selectColor('white')" color="white" :currentColor="model.details.color" circleColor="text-white"/>
-                    <Color @click="selectColor('brown')" color="brown" :currentColor="model.details.color" circleColor="text-amber-600"/>
-                  </div>
-                </div>
-                <div id="size" class="relative" v-if="attribute.name === 'Size'">
-                  <h1 class="text-gray-800 mt-5">Size</h1>
-                  <div class="grid grid-cols-4 lg:grid-cols-8 gap-2">
-                    <Size v-for="size in model.sizes.sizeList" :key="size" 
-                    @click="showSizeModal(size.name)" :size="size" />
-                  </div>
-                </div>
-                <div v-if="attribute.name !== 'Color' && attribute.name !== 'Size'" class="relative">
-                  <div class="flex justify-between">
-                    <label :for="attribute.name" class="mt-5">{{ attribute.name }}</label>
-                    <button @click="showValueModal(attribute.name, attribute.id)" class="mt-4">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                      class="bi bi-plus-circle mt-2" viewBox="0 0 16 16">
-                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-                      </svg>
-                    </button>
-                  </div>
-                  <select @change="selectAttributeValue" :id="attribute.name" 
-                  class='attribute w-full py-2 border px-2 mt-2'>
-                    <option selected disabled>Select</option>
-                    <option v-for="value in attribute.values" :key="value.id" :value="value.name">
-                      {{ value.name }}
+          </div>
+          <div>
+            <hr class="mt-4">
+            <h1 class="font-semibold my-3">Product Category</h1>
+          </div>
+          <div class="w-full py-2 flex flex-col space-x-0 md:space-x-6 md:flex-row">
+              <div class="w-full space-y-2">
+                <div class="space-y-2">
+                  <label for="category">Category</label>
+                  <select @change="chooseCategory" v-model="model.categories.mainCategoryId" id="category" class='w-full py-2 border px-2'>
+                    <option v-for="category in mainCategories" :key="category.id" :value="category.id">
+                      {{ category.name }}
                     </option>
                   </select>
                 </div>
               </div>
-            </div>
-
-            <div id="imageSelect" class="relative mb-6 space-x-6">
-              <h1 class="font-semibold  my-4">Product Image 
-                ( {{ model.images.imageBase64.length }}/6 ) 
-                <span class="text-gray-600 font-light">Recommended Size ( 600 x 799 )</span>
-              </h1>
-              <div class="grid gap-2 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
-                
-                <div v-for="(image, index) in model.images.imageBase64" :key="image" class="relative">
-                  <img :src="image" class="border shadow-md mt-1" 
-                  style="min-height: 112px; min-width: 112px; max-height: 112px; max-width: 112px" :alt="image">
-                  <span @click="removeImage(index)" class="absolute -mt-28 ml-24 cursor-pointer hover:text-red-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-square" viewBox="0 0 16 16">
-                      <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
-                      <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-                    </svg>
-                  </span>
-                </div>
-                <div v-if="model.images.imageBase64.length < 6">
-                  <label for="image" class="cursor-pointer">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="112" height="112" fill="currentColor" class="bi bi-plus border border-gray-900 py-5 px-5" viewBox="0 0 16 16">
-                      <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-                      </svg>
-                  </label>
-                  <input @change="chooseImage" id="image" type="file" 
-                  class='w-2 py-2 border px-2' accept="image/png, image/jpeg, image/webp" hidden multiple>
+              <div class="w-full space-y-2">
+                <div class="space-y-2">
+                  <label for="sub_category">Sub Category</label>
+                  <select  @change="chooseSubCategory" v-model="model.categories.subCategoryId" id="category" class='w-full py-2 border px-2'>
+                    <option v-for="category in subCategories" :key="category.id" :value="category.id" >
+                      {{ category.name }}
+                    </option>
+                  </select>
                 </div>
               </div>
+          </div>
+          <div>
+            <hr class="mt-4">
+            <h1 class="font-semibold my-3">Product Attributes</h1>
+          </div>
+          <div class="w-full grid grid-cols-1 py-2 gap-x-5 md:grid-cols-2">
+            <div v-for="attribute in model.attributes.attributeList" :key="attribute.id">
+              <div id="color" class="space-y-2 relative" v-if="attribute.name === 'Color'">
+                <label class="mt-5 inline-block">Color: <span class="text-gray-700 font-semibold mt-4">{{ model.details.color }}</span></label>
+                <div class="grid grid-cols-8">
+                  <Color @click="selectColor('yellow')" color="yellow" :currentColor="model.details.color" circleColor="text-yellow-500"/>
+                  <Color @click="selectColor('green')" color="green" :currentColor="model.details.color" circleColor="text-green-500"/>
+                  <Color @click="selectColor('blue')" color="blue" :currentColor="model.details.color" circleColor="text-blue-500"/>
+                  <Color @click="selectColor('violet')" color="violet" :currentColor="model.details.color" circleColor="text-violet-500"/>
+                  <Color @click="selectColor('red')" color="red" :currentColor="model.details.color" circleColor="text-red-600"/>
+                  <Color @click="selectColor('orange')" color="orange" :currentColor="model.details.color" circleColor="text-orange-500"/>
+                  <Color @click="selectColor('gray')" color="gray" :currentColor="model.details.color" circleColor="text-gray-500"/>
+                  <Color @click="selectColor('pink')" color="pink" :currentColor="model.details.color" circleColor="text-pink-500"/>
+                  <Color @click="selectColor('black')" color="black" :currentColor="model.details.color" circleColor="text-black"/>
+                  <Color @click="selectColor('white')" color="white" :currentColor="model.details.color" circleColor="text-white"/>
+                  <Color @click="selectColor('brown')" color="brown" :currentColor="model.details.color" circleColor="text-amber-600"/>
+                </div>
+              </div>
+              <div id="size" class="relative" v-if="attribute.name === 'Size'">
+                <h1 class="text-gray-800 mt-5">Size</h1>
+                <div class="grid grid-cols-4 lg:grid-cols-8 gap-2">
+                  <Size v-for="size in model.sizes.sizeList" :key="size" 
+                  @click="showSizeModal(size.name)" :size="size" />
+                </div>
+              </div>
+              <div v-if="attribute.name !== 'Color' && attribute.name !== 'Size'" class="relative">
+                <div class="flex justify-between">
+                  <label :for="attribute.name" class="mt-5">{{ attribute.name }}</label>
+                  <button @click="showValueModal(attribute.name, attribute.id)" class="mt-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                    class="bi bi-plus-circle mt-2" viewBox="0 0 16 16">
+                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                      <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                    </svg>
+                  </button>
+                </div>
+                <select :id="attribute.name" 
+                class='attribute w-full py-2 border px-2 mt-2'>
+                  <option selected disabled>Select</option>
+                  <option v-for="value in attribute.values" :key="value.id" :value="value.name">
+                    {{ value.name }}
+                  </option>
+                </select>
+              </div>
             </div>
+          </div>
+
+          <div id="imageSelect" class="relative mb-6 space-x-6">
+            <h1 class="font-semibold  my-4">Product Image 
+              ( {{ model.images.imageBase64.length }}/6 ) 
+              <span class="text-gray-600 font-light">Recommended Size ( 600 x 799 )</span>
+            </h1>
+            <div class="grid gap-2 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+              
+              <div v-for="(image, index) in model.images.imageBase64" :key="image" class="relative">
+                <img :src="image" class="border shadow-md mt-1" 
+                style="min-height: 112px; min-width: 112px; max-height: 112px; max-width: 112px" :alt="image">
+                <span @click="removeImage(index)" class="absolute -mt-28 ml-24 cursor-pointer hover:text-red-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-square" viewBox="0 0 16 16">
+                    <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                  </svg>
+                </span>
+              </div>
+              <div v-if="model.images.imageBase64.length < 6">
+                <label for="image" class="cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="112" height="112" fill="currentColor" class="bi bi-plus border border-gray-900 py-5 px-5" viewBox="0 0 16 16">
+                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                    </svg>
+                </label>
+                <input @change="chooseImage" id="image" type="file" 
+                class='w-2 py-2 border px-2' accept="image/png, image/jpeg, image/webp" hidden multiple>
+              </div>
+            </div>
+          </div>
         </template>
 
     </ProductModal>
+    
     <Modal v-show="isValueModalVisible" @closeModal="closeValueModal" 
     @confirmModal="confirmCreateValue">
 
@@ -299,7 +295,26 @@
         </p>
       </template>
     </Modal>
-    <!-- TODO:: ALWAYS FETCH THE CURRENT NUMBER OF ENTRIES -->
+
+    <Modal v-show="isDeleteImageModal" @closeModal="closeDeleteImageModal" 
+    @confirmModal="confirmDeleteImageModal">
+      <template v-slot:header>
+       <span class="inline-block">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-trash text-red-500" viewBox="0 0 16 16">
+          <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+          <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+        </svg>
+        </span> 
+        Delete
+      </template>
+
+      <template v-slot:body>
+        <p class="text-lg text-center">
+          You want to permanently deleted this image? 
+        </p>
+      </template>
+    </Modal>
+    <!-- TODO:: SET UP UPDATE DETAILS OF PRODUCT -->
   </div>
 </template>
 
@@ -320,6 +335,8 @@ import Size from '../../components/Icons/Size.vue'
   const isValueModalVisible = ref(false)
   const isSizeModalVisible = ref(false)
   const isDeleteModalVisible = ref(false)
+  const isDeleteImageModal = ref(false)
+  const isEditing = ref(false)
   const model = ref({
     details : {
       sku : '',
@@ -335,7 +352,6 @@ import Size from '../../components/Icons/Size.vue'
     attributes : {
       attributeId : 4,
       attributeList : [],
-      attributeListValue : [],
       attributeName : '',
       newAttributeValue : '',
     },
@@ -354,14 +370,16 @@ import Size from '../../components/Icons/Size.vue'
     images : {
       imageBase64: [],
       productImages: [],
+      deletedImage : [],
+      deleteImageIndex : null
     },
     products : {
       productList : [],
-      currentProduct : ''
+      currentProduct : '',
     },
     entries : {
       showEntries : [10, 25, 50, 100],
-      currentEntry : 10,
+      currentEntry : 10
     },
     errors : {
       valueError : '',
@@ -394,7 +412,9 @@ import Size from '../../components/Icons/Size.vue'
     await store.dispatch('getMainCategory')
     await store.dispatch('getSubCategory', model.value.categories.mainCategoryId)
     await store.dispatch('getAttribute', model.value.categories.subCategoryId)
-    await store.dispatch('getAllProducts')
+    const formData = new FormData()
+    formData.append('entry', model.value.entries.currentEntry)
+    await store.dispatch('getAllProducts', formData)
   })
 
   // MODALS
@@ -403,30 +423,79 @@ import Size from '../../components/Icons/Size.vue'
     selectSize(size)
   }
   const closeSizeModal = () => isSizeModalVisible.value = false
-  const showProductModal = () => isModalVisible.value = true
-  const closeProductModal = () => isModalVisible.value = false
+  const showProductModal = async (editing, id = null) => {
+    isEditing.value = editing
+    if(editing){
+      await store.dispatch('getProduct', id)
+      const dropdown = document.getElementById(`${id}`)
+      dropdown.classList.add('hidden')
+
+      // Setting all fields baseon on current product details
+      const product = model.value.products.currentProduct
+      isModalVisible.value = true
+      model.value.details.sku = product.product_item.sku
+      model.value.details.name = product.name
+      model.value.details.price = product.product_item.price
+      model.value.details.qty_stock = product.product_item.qty_stock
+      model.value.images.imageBase64 = JSON.parse(product.product_item.product_image)
+      model.value.sizes.sizeList = JSON.parse(product.description).size
+      model.value.details.color = JSON.parse(product.description).color
+      
+      // Changing id's of categories and call category request
+      model.value.categories.mainCategoryId = product.categories[0].parent_id
+      model.value.categories.subCategoryId = product.categories[0].id
+      chooseCategory()
+
+      // Adding delay so that all attributes 'select element' should be filled in DOM
+      // Selecting all attribute's value based on current products attributes
+      setTimeout(() => {
+        for (const [key, value] of Object.entries(JSON.parse(product.description))) {
+          if(key !== 'color' && key !== 'size'){
+            const element = document.getElementById(`${key}`)
+            if (element) element.value = value
+          }
+        }
+      }, 2000)
+
+    } else {
+      isModalVisible.value = true
+    }
+  }
+  const closeProductModal = () => {
+    isModalVisible.value = false
+    // Reset the fields to default values
+    if(isEditing.value){
+      model.value.details.sku = ''
+      model.value.details.name = ''
+      model.value.details.price = ''
+      model.value.details.qty_stock = ''
+      model.value.details.color = ''
+      model.value.images.imageBase64 = []
+      model.value.sizes.sizeList.forEach(el => el.count = 0)
+      model.value.categories.mainCategoryId = 1
+      model.value.categories.subCategoryId = 4
+      chooseCategory()
+    }
+  }
   const closeValueModal = () => isValueModalVisible.value = false
   const showValueModal = (attributeName, attributeId) => {
     isValueModalVisible.value = true
     model.value.attributes.attributeName = attributeName
     model.value.attributes.attributeId = attributeId
   }
+  const closeDeleteProductModal = () => isDeleteModalVisible.value = false
   const showDeleteProductModal = async (id) => {
     isDeleteModalVisible.value = true
     const dropdown = document.getElementById(`${id}`)
     dropdown.classList.add('hidden')
     await store.dispatch('getProduct', id)
   }
-  const closeDeleteProductModal = () => isDeleteModalVisible.value = false
-  const confirmDeleteProduct = async (product_id) => {
-    if(product_id){
-      try {
-        await store.dispatch('deleteProduct', product_id)
-        isDeleteModalVisible.value = false
-        alert('Product deleted successfully!')
-      } catch (error) {
-      }
-    }
+  const closeDeleteImageModal = () => isDeleteImageModal.value = false
+  const confirmDeleteImageModal = () => {
+    const index = model.value.images.deleteImageIndex
+    const image = model.value.images.imageBase64.splice(index, 1)
+    model.value.images.deletedImage.push(image)
+    isDeleteImageModal.value = false
   }
 
   // MODAL FUNCTIONS
@@ -472,8 +541,8 @@ import Size from '../../components/Icons/Size.vue'
       }
     })
     
-    // Validate if there is attribute "Size" and if 
-    // user already selected sizes
+    // Validate if there is attribute "Size" in attiribute list.
+    // if there is, then validate if user already selected sizes
     const array = model.value.attributes.attributeList
     let exist = false
     let sizeSelected = false
@@ -519,7 +588,6 @@ import Size from '../../components/Icons/Size.vue'
     let qtyStockSizeEqual = false
     let total = 0
     model.value.sizes.sizeList.forEach(el => total += el.count)
-    console.log(total);
     if(total != model.value.details.qty_stock && sizeSelected){
       let element = document.querySelector('#size')
       const paragraph = document.createElement("p");
@@ -596,6 +664,21 @@ import Size from '../../components/Icons/Size.vue'
     }
   }
 
+  const confirmDeleteProduct = async (product_id) => {
+    if(product_id){
+      try {
+        const formData = new FormData()
+        formData.append('entry', model.value.entries.currentEntry)
+        formData.append('product_id', product_id)
+        await store.dispatch('deleteProduct', formData)
+        isDeleteModalVisible.value = false
+        alert('Product deleted successfully!')
+      } catch (error) {
+
+      }
+    }
+  }
+
   const selectColor = (color) => model.value.details.color = color
   const selectSize = (size) => {
     model.value.sizes.selectedSize = size
@@ -614,7 +697,6 @@ import Size from '../../components/Icons/Size.vue'
 
   const chooseSubCategory = async () => { 
     await store.dispatch('getAttribute', model.value.categories.subCategoryId)
-    model.value.attributes.attributeListValue = []
   }
 
   const chooseImage = () => {
@@ -635,33 +717,21 @@ import Size from '../../components/Icons/Size.vue'
   }
 
   const removeImage = (index) => {
-    model.value.images.imageBase64.splice(index, 1)
-    model.value.images.productImages.splice(index, 1)
-  }
-
-  const selectAttributeValue = (event) => {
-    let property = event.target.id
-    let value = event.target.value
-    let exist = false
-
-    model.value.attributes.attributeListValue.forEach(element => {
-      if(element.name === property){
-        element.value = value
-        exist = true
-      }
-    })
-
-    if(!exist){
-      model.value.attributes.attributeListValue.push({ name : property, value : value})
+    if(isEditing.value) {
+      isDeleteImageModal.value = true
+      model.value.images.deleteImageIndex = index
+    } else {
+      model.value.images.imageBase64.splice(index, 1)
+      model.value.images.productImages.splice(index, 1)
     }
-
   }
 
   const view = () => {
     let current_page = model.value.products.productList.current_page
     let pageNum = current_page ? current_page : 1
-
-    axiosClient.get(`/product/?page=${pageNum}`)
+    const formData = new FormData()
+    formData.append('entry', model.value.entries.currentEntry)
+    axiosClient.post(`/products/?page=${pageNum}`, formData)
       .then((res) => {
         model.value.products.productList = res.data.data
       })
@@ -687,6 +757,12 @@ import Size from '../../components/Icons/Size.vue'
         button.classList.remove('text-gray-900')
       }
     })
+  }
+
+  const chooseEntry = async () => {
+    const formData = new FormData()
+    formData.append('entry', model.value.entries.currentEntry)
+    await store.dispatch('getAllProducts', formData)
   }
 
 </script>
