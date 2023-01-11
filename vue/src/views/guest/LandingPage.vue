@@ -54,7 +54,6 @@ import store from "../../store";
     email : '',
     password : '',
     remember : false,
-    otp_code : '',
     errors : {
       email : '',
       password : '',

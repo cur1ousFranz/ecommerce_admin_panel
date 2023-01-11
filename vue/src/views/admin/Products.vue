@@ -1,8 +1,8 @@
 <template>
   <div class="space-y-2">
     <div class="flex justify-between">
-        <div>
-            <p>Show 
+        <div class="flex space-x-4">
+            <p class="text-sm">Show 
                 <span>
                     <select @change="chooseEntry" v-model="model.entries.currentEntry"  class="border px-2">
                         <option v-for="entry in model.entries.showEntries" :key="entry" :value="entry">
@@ -12,9 +12,29 @@
                 </span>
                 Entries
             </p>
+            <p class="text-sm">
+              Sort Price:
+              <span>
+                    <select  class="border px-2">
+                        <option>Latest</option>
+                        <option>Ascending</option>
+                        <option>Descending</option>
+                    </select>
+                </span>
+            </p>
+            <p class="text-sm">
+              Sort Name:
+              <span>
+                    <select  class="border px-2">
+                        <option>Latest</option>
+                        <option>Ascending</option>
+                        <option>Descending</option>
+                    </select>
+                </span>
+            </p>
         </div>
         <div class="flex space-x-3">
-            <input type="text" class=' py-2 border px-2' placeholder="Search">
+            <input type="text" class='border px-2' placeholder="Search">
             <button @click="showProductModal(false)" class="px-3 py-2 space-x-2 bg-gray-800 text-sm text-white hover:bg-gray-700">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="inline-block bi bi-plus-square" viewBox="0 0 16 16">
                 <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
@@ -24,12 +44,12 @@
             </button>
         </div>
     </div>
-    <table class="table-fixed shadow-md h-full w-full text-sm text-gray-500">
+    <table class="table-auto shadow-md h-full w-full text-sm text-gray-500">
       <thead class="text-xs text-gray-900 uppercase">
         <tr>
           <th scope="col" class="py-3 px-6">SKU</th>
           <th scope="col" class="py-3 px-6">Name</th>
-          <th scope="col" class="py-3 px-6">Qty</th>
+          <th scope="col" class="py-3 px-6">Qty / Sold</th>
           <th scope="col" class="py-3 px-6">Price</th>
           <th scope="col" class="py-3 px-6">Sale Price</th>
         </tr>
@@ -38,11 +58,13 @@
         <tr v-for="product in model.products.productList.data" :key="product.id" class="hover:text-gray-900 hover:bg-gray-200">
           <td class="py-2">{{ product.product_item.sku }}</td>
           <td class="py-2">{{ product.name }}</td>
-          <td class="py-2">{{ product.product_item.qty_stock }}</td>
+          <td class="py-2">{{ product.product_item.qty_stock }} / 0</td>
           <td class="py-2">{{ product.product_item.price }}</td>
-          <td class="py-2 relative flex justify-center">
-            {{ product.product_item.sale_price ?? 0  }}
-            <div class="absolute ml-44">
+          <td class="py-2 flex justify-between">
+            <p class="text-center w-full">
+              {{ product.product_item.sale_price ?? 0  }}
+            </p>
+            <div class="">
               <div class="relative inline-block text-left">
                 <button class="text-gray-400 hover:text-gray-900" @click="showDotDropdown(product.id)">
                   <span class="inline-block">
@@ -92,7 +114,8 @@
         </tr>
       </tbody>
     </table>
-    <div class="flex justify-end py-1">
+    <div class="flex justify-between py-1">
+      <p class="text-gray-500 text-sm">Result total: {{ model.products.productList.total }}</p>
       <Pagination :pagination="model.products.productList" @paginate="view" :offset="4"></Pagination>
     </div>
 
@@ -100,7 +123,7 @@
     <ProductModal v-show="isModalVisible" @close="closeProductModal" @some-event="confirmCreateProduct" 
     :loading="createProductLoading">
         <template v-slot:header>
-          Create Product {{ isEditing }}
+          {{ isEditing ? 'Edit Product' : 'Create Product '}}
         </template>
 
         <template v-slot:body>
@@ -113,13 +136,14 @@
                     <label for="sku">SKU</label>
                     <input v-model="model.details.sku" id="sku" type="text" 
                     :class=" model.errors.sku ? 'w-full py-2 border border-red-500 focus:outline-red-500 px-2' : 'w-full py-2 border px-2'"
-                      placeholder="Ex. TSH-FFF-M">
+                      placeholder="Ex. TSH-FFF-M" maxlength="30">
                     <p class="text-sm absolute text-red-500"> {{ model.errors.sku }}</p>
                 </div>
                 <div class="relative">
                     <label for="name">Name</label>
                     <input v-model="model.details.name" id="name" type="text" 
-                    :class=" model.errors.name ? 'w-full py-2 border border-red-500 focus:outline-red-500 px-2' : 'w-full py-2 border px-2'" placeholder="Ex. Oxygn Apparrel">
+                    :class=" model.errors.name ? 'w-full py-2 border border-red-500 focus:outline-red-500 px-2' 
+                    : 'w-full py-2 border px-2'" placeholder="Ex. Oxygn Apparrel" maxlength="30">
                     <p class="text-sm absolute text-red-500"> {{ model.errors.name }}</p>
                 </div>
             </div>
@@ -232,7 +256,7 @@
                   </svg>
                 </span>
               </div>
-              <div v-if="model.images.imageBase64.length < 6">
+              <div v-if="model.images.imageBase64.length < 6 && !isEditing">
                 <label for="image" class="cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" width="112" height="112" fill="currentColor" class="bi bi-plus border border-gray-900 py-5 px-5" viewBox="0 0 16 16">
                     <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
@@ -314,7 +338,7 @@
         </p>
       </template>
     </Modal>
-    <!-- TODO:: SET UP UPDATE DETAILS OF PRODUCT -->
+    <!-- TODO:: SEARCH, SORTING -->
   </div>
 </template>
 
@@ -378,7 +402,7 @@ import Size from '../../components/Icons/Size.vue'
       currentProduct : '',
     },
     entries : {
-      showEntries : [10, 25, 50, 100],
+      showEntries : [5, 10, 25, 50, 100],
       currentEntry : 10
     },
     errors : {
@@ -446,7 +470,7 @@ import Size from '../../components/Icons/Size.vue'
       model.value.categories.subCategoryId = product.categories[0].id
       chooseCategory()
 
-      // Adding delay so that all attributes 'select element' should be filled in DOM
+      // Adding delay so that all attributes 'select element' should be filled in DOM.
       // Selecting all attribute's value based on current products attributes
       setTimeout(() => {
         for (const [key, value] of Object.entries(JSON.parse(product.description))) {
@@ -607,16 +631,26 @@ import Size from '../../components/Icons/Size.vue'
         attributeObj.size = model.value.sizes.sizeList
 
         const formData = new FormData()
-        model.value.images.productImages.forEach(element => formData.append('product_image[]', element))
+        if(isEditing.value){
+          model.value.images.deletedImage.forEach(element => formData.append('deleted_image[]', element))
+        } else {
+          model.value.images.productImages.forEach(element => formData.append('product_image[]', element))
+        }
 
-        formData.append('category_id', model.value.categories.subCategoryId)
         formData.append('name', model.value.details.name)
         formData.append('description', JSON.stringify(attributeObj)) 
         formData.append('sku', model.value.details.sku)
         formData.append('qty_stock', model.value.details.qty_stock)
         formData.append('price', model.value.details.price)
         formData.append('entry', model.value.entries.currentEntry)
-        const res = await store.dispatch('createProduct', formData)
+        if(!isEditing.value){
+          formData.append('category_id', model.value.categories.subCategoryId)
+          await store.dispatch('createProduct', formData)
+        } else {
+          formData.append("_method", "put");
+          formData.append('product_id', model.value.products.currentProduct.id)
+          await store.dispatch('updateProduct', formData)
+        }   
 
         // Reset fields after success creating product
         model.value.details.sku = ''
@@ -627,8 +661,9 @@ import Size from '../../components/Icons/Size.vue'
         model.value.images.imageBase64 = []
         model.value.images.productImages = []
         model.value.sizes.sizeList.forEach(el => el.count = 0)
-        alert('Product created success!')
         closeProductModal()
+        isEditing.value ? alert('Product updated success!') : alert('Product created success!')
+       
       }
     } catch (err) {
       if (err.response.data.errors.hasOwnProperty('sku')) {
@@ -708,18 +743,33 @@ import Size from '../../components/Icons/Size.vue'
         reader.onloadend = () => {
           if(model.value.images.imageBase64.length < 6){
             model.value.images.imageBase64.push(reader.result);
+            model.value.images.productImages.push(file);
           }
         }
         reader.readAsDataURL(file);
       }
-      model.value.images.productImages.push(file);
     }
   }
 
   const removeImage = (index) => {
+
     if(isEditing.value) {
-      isDeleteImageModal.value = true
-      model.value.images.deleteImageIndex = index
+      // Show confirmation if editing product
+      if(model.value.images.imageBase64.length < 3){
+        const errors = document.querySelectorAll('.error')
+        errors.forEach(element => element.remove())
+
+        let element = document.querySelector('#imageSelect')
+        const paragraph = document.createElement("p");
+        paragraph.classList = 'error absolute text-red-500 text-sm'
+        const node = document.createTextNode(`Must atleast 2 images.`);
+        paragraph.appendChild(node);
+        element.appendChild(paragraph);
+      }else{
+        isDeleteImageModal.value = true
+        model.value.images.deleteImageIndex = index
+      }
+      
     } else {
       model.value.images.imageBase64.splice(index, 1)
       model.value.images.productImages.splice(index, 1)
