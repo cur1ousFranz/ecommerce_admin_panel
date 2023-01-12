@@ -28,12 +28,16 @@ const store = createStore({
   getters: {},
   actions: {
     // ADMIN
+    async searchProduct({commit}, formData) {
+      const res = await axiosClient.post('product/search', formData);
+      commit('setProductData', res.data)
+    },
     async updateProduct({commit}, formData) {
       const res = await axiosClient.post(`/product/${formData.get('product_id')}`, formData);
       commit('setProductData', res.data)
     },
     async deleteProduct({commit}, formData) {
-      const res = await axiosClient.delete(`/product/${formData.get('product_id')}`, formData);
+      const res = await axiosClient.post(`/product/${formData.get('product_id')}`, formData);
       commit('setProductData', res.data)
     },
     async getProduct({commit}, id) {
@@ -42,7 +46,7 @@ const store = createStore({
     },
     async getAllProducts({commit}, formData) {
       commit('setProductLoading', true)
-      const res = await axiosClient.post(`/products`, formData)
+      const res = await axiosClient.post(`/product`, formData)
       commit('setProductLoading', false)
       commit('setProductData', res.data)
       return res

@@ -1,8 +1,8 @@
 <template>
   <div class="space-y-2">
-    <div class="flex justify-between">
-        <div class="flex space-x-4">
-            <p class="text-sm">Show 
+    <div class="flex flex-col-reverse md:flex-row md:justify-between">
+        <div class="flex flex-col py-2 space-y-2 md:space-y-0 md:space-x-4 md:flex-row ">
+            <p class="text-sm">Show
                 <span>
                     <select @change="chooseEntry" v-model="model.entries.currentEntry"  class="border px-2">
                         <option v-for="entry in model.entries.showEntries" :key="entry" :value="entry">
@@ -12,40 +12,41 @@
                 </span>
                 Entries
             </p>
-            <p class="text-sm">
-              Sort Price:
-              <span>
-                    <select  class="border px-2">
-                        <option>Latest</option>
-                        <option>Ascending</option>
-                        <option>Descending</option>
-                    </select>
-                </span>
-            </p>
-            <p class="text-sm">
-              Sort Name:
-              <span>
-                    <select  class="border px-2">
-                        <option>Latest</option>
-                        <option>Ascending</option>
-                        <option>Descending</option>
-                    </select>
-                </span>
-            </p>
+            <div class="flex justify-between">
+              <p class="text-sm">
+                Sort By:
+                <span>
+                      <select @change="chooseSort" v-model="model.sort.currentSort" class="border px-2">
+                          <option v-for="sort in model.sort.sortList" :key="sort" :value="sort">
+                            {{ sort }}
+                          </option>
+                      </select>
+                  </span>
+              </p>
+            </div>
         </div>
-        <div class="flex space-x-3">
-            <input type="text" class='border px-2' placeholder="Search">
-            <button @click="showProductModal(false)" class="px-3 py-2 space-x-2 bg-gray-800 text-sm text-white hover:bg-gray-700">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="inline-block bi bi-plus-square" viewBox="0 0 16 16">
-                <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
-                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-                </svg>
-                <span>PRODUCT</span>
-            </button>
+        <div class="flex flex-col md:space-x-3 md:flex-row">
+          <div class="px-2 border flex justify-between my-4 md:my-0">
+            <input v-model="model.details.search" @keyup="searchProduct" type="text" 
+            class='px-4 py-2 ring-white focus:ring-0 focus:outline-none' placeholder="Search">
+            <span @click="clearSearch" :class="[model.details.search ? 'mt-3 cursor-pointer hover:text-red-500' 
+            : 'hidden mt-3 cursor-pointer hover:text-red-500']">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+              </svg>
+            </span>
+          </div>
+          <button @click="showProductModal(false)" class="px-3 py-2 space-x-2 bg-gray-800 text-sm text-white hover:bg-gray-700">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="inline-block bi bi-plus-square" viewBox="0 0 16 16">
+              <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+              <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+              </svg>
+              <span>PRODUCT</span>
+          </button>
         </div>
     </div>
     <table class="table-auto shadow-md h-full w-full text-sm text-gray-500">
-      <thead class="text-xs text-gray-900 uppercase">
+      <thead class="text-xs text-gray-900 border-b border-t uppercase">
         <tr>
           <th scope="col" class="py-3 px-6">SKU</th>
           <th scope="col" class="py-3 px-6">Name</th>
@@ -368,6 +369,7 @@ import Size from '../../components/Icons/Size.vue'
       price : '',
       qty_stock : '',
       color : '',
+      search : ''
     },
     categories : {
       mainCategoryId : 1,
@@ -403,7 +405,14 @@ import Size from '../../components/Icons/Size.vue'
     },
     entries : {
       showEntries : [5, 10, 25, 50, 100],
-      currentEntry : 10
+      currentEntry : 5
+    },
+    sort : {
+      sortList : ['Latest', 'Oldest', 'Sku', 'Name', 'Qty', 'Price'],
+      currentSort : 'Latest'
+    },
+    paginate : {
+      currentPage : 1
     },
     errors : {
       valueError : '',
@@ -438,6 +447,9 @@ import Size from '../../components/Icons/Size.vue'
     await store.dispatch('getAttribute', model.value.categories.subCategoryId)
     const formData = new FormData()
     formData.append('entry', model.value.entries.currentEntry)
+    formData.append('sort', model.value.sort.currentSort)
+    formData.append('current_page', model.value.paginate.currentPage)
+    formData.append("_method", "get");
     await store.dispatch('getAllProducts', formData)
   })
 
@@ -643,12 +655,14 @@ import Size from '../../components/Icons/Size.vue'
         formData.append('qty_stock', model.value.details.qty_stock)
         formData.append('price', model.value.details.price)
         formData.append('entry', model.value.entries.currentEntry)
+        formData.append('sort', model.value.sort.currentSort)
+        formData.append('current_page', model.value.paginate.currentPage)
         if(!isEditing.value){
           formData.append('category_id', model.value.categories.subCategoryId)
           await store.dispatch('createProduct', formData)
         } else {
-          formData.append("_method", "put");
           formData.append('product_id', model.value.products.currentProduct.id)
+          formData.append("_method", "put");
           await store.dispatch('updateProduct', formData)
         }   
 
@@ -704,7 +718,10 @@ import Size from '../../components/Icons/Size.vue'
       try {
         const formData = new FormData()
         formData.append('entry', model.value.entries.currentEntry)
+        formData.append('sort', model.value.sort.currentSort)
+        formData.append('current_page', model.value.paginate.currentPage)
         formData.append('product_id', product_id)
+        formData.append("_method", "delete")
         await store.dispatch('deleteProduct', formData)
         isDeleteModalVisible.value = false
         alert('Product deleted successfully!')
@@ -779,9 +796,13 @@ import Size from '../../components/Icons/Size.vue'
   const view = () => {
     let current_page = model.value.products.productList.current_page
     let pageNum = current_page ? current_page : 1
+    model.value.paginate.currentPage = pageNum
     const formData = new FormData()
     formData.append('entry', model.value.entries.currentEntry)
-    axiosClient.post(`/products/?page=${pageNum}`, formData)
+    formData.append('sort', model.value.sort.currentSort)
+    formData.append('current_page', model.value.paginate.currentPage)
+    formData.append("_method", "get")
+    axiosClient.post(`/product/?page=${pageNum}`, formData)
       .then((res) => {
         model.value.products.productList = res.data.data
       })
@@ -812,7 +833,33 @@ import Size from '../../components/Icons/Size.vue'
   const chooseEntry = async () => {
     const formData = new FormData()
     formData.append('entry', model.value.entries.currentEntry)
+    formData.append('sort', model.value.sort.currentSort)
+    formData.append('current_page', model.value.paginate.currentPage)
+    formData.append("_method", "get");
     await store.dispatch('getAllProducts', formData)
+  }
+
+  const chooseSort = async () => {
+    const formData = new FormData()
+    formData.append('entry', model.value.entries.currentEntry)
+    formData.append('sort', model.value.sort.currentSort)
+    formData.append('current_page', model.value.paginate.currentPage)
+    formData.append("_method", "get");
+    await store.dispatch('getAllProducts', formData)
+  }
+  
+  const searchProduct = () => {
+    setTimeout(() => {
+      const formData = new FormData()
+      formData.append('search', model.value.details.search)
+      formData.append('entry', model.value.entries.currentEntry)
+      store.dispatch('searchProduct', formData)
+    }, 500)
+  }
+
+  const clearSearch = () => {
+    model.value.details.search = ''
+    searchProduct()
   }
 
 </script>

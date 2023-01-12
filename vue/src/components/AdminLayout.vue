@@ -1,7 +1,7 @@
 <template>
   <div class="flex">
 
-    <div class="flex flex-no-wrap">
+    <div class="flex flex-no-wrap fixed">
         <!-- Sidebar starts -->
         <!-- Remove class [ hidden ] and replace [ sm:flex ] with [ flex ] -->
         <div style="min-height: 716px" class="w-64 absolute bg-gray-800 shadow h-full flex-col justify-start hidden sm:flex sm:relative">
@@ -88,7 +88,7 @@
         <!-- Sidebar ends -->
     </div>
                 
-    <div class="space-y-12 w-full">
+    <div class="space-y-12 w-full sm:ml-64">
       <div class="container p-4 border-b">
         <div class="flex justify-end">
           <div v-if="authenticated" class="relative inline-block text-left">
