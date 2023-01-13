@@ -1,49 +1,55 @@
 <template>
   <div class="space-y-2">
+   
+    <div v-if="model.errors.connection" class="relative flex justify-center">
+      <div class="absolute border -mt-4 w-1/2 rounded text-center p-4 z-10 bg-red-500 text-white">
+        <p>Something went wrong!</p>
+      </div>
+    </div>
     <div class="flex flex-col-reverse md:flex-row md:justify-between">
-        <div class="flex flex-col py-2 space-y-2 md:space-y-0 md:space-x-4 md:flex-row ">
-            <p class="text-sm">Show
-                <span>
-                    <select @change="chooseEntry" v-model="model.entries.currentEntry"  class="border px-2">
-                        <option v-for="entry in model.entries.showEntries" :key="entry" :value="entry">
-                          {{ entry }}
+      <div class="flex flex-col py-2 space-y-2 md:space-y-0 md:space-x-4 md:flex-row ">
+          <p class="text-sm">Show
+              <span>
+                  <select @change="chooseEntry" v-model="model.entries.currentEntry"  class="border px-2">
+                      <option v-for="entry in model.entries.showEntries" :key="entry" :value="entry">
+                        {{ entry }}
+                      </option>
+                  </select>
+              </span>
+              Entries
+          </p>
+          <div class="flex justify-between">
+            <p class="text-sm">
+              Sort By:
+              <span>
+                    <select @change="chooseSort" v-model="model.sort.currentSort" class="border px-2">
+                        <option v-for="sort in model.sort.sortList" :key="sort" :value="sort">
+                          {{ sort }}
                         </option>
                     </select>
                 </span>
-                Entries
             </p>
-            <div class="flex justify-between">
-              <p class="text-sm">
-                Sort By:
-                <span>
-                      <select @change="chooseSort" v-model="model.sort.currentSort" class="border px-2">
-                          <option v-for="sort in model.sort.sortList" :key="sort" :value="sort">
-                            {{ sort }}
-                          </option>
-                      </select>
-                  </span>
-              </p>
-            </div>
-        </div>
-        <div class="flex flex-col md:space-x-3 md:flex-row">
-          <div class="px-2 border flex justify-between my-4 md:my-0">
-            <input v-model="model.details.search" @keyup="searchProduct" type="text" 
-            class='px-4 py-2 ring-white focus:ring-0 focus:outline-none' placeholder="Search">
-            <span @click="clearSearch" :class="[model.details.search ? 'mt-3 cursor-pointer hover:text-red-500' 
-            : 'hidden mt-3 cursor-pointer hover:text-red-500']">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
-                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
-              </svg>
-            </span>
           </div>
-          <button @click="showProductModal(false)" class="px-3 py-2 space-x-2 bg-gray-800 text-sm text-white hover:bg-gray-700">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="inline-block bi bi-plus-square" viewBox="0 0 16 16">
-              <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
-              <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-              </svg>
-              <span>PRODUCT</span>
-          </button>
+      </div>
+      <div class="flex justify-between space-x-2">
+        <div class="px-2 border flex justify-between">
+          <input v-model="model.details.search" @keyup="searchProduct" type="text" 
+          class='px-4 py-2 ring-white focus:ring-0 focus:outline-none' placeholder="Search">
+          <span @click="clearSearch" :class="[model.details.search ? 'mt-3 cursor-pointer hover:text-red-500' 
+          : 'hidden mt-3 cursor-pointer hover:text-red-500']">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+              <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+            </svg>
+          </span>
         </div>
+        <button @click="showProductModal(false)" class="px-3 py-2 space-x-2 bg-gray-800 text-sm text-white hover:bg-gray-700">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="inline-block bi bi-plus-square" viewBox="0 0 16 16">
+            <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+            </svg>
+            <span>PRODUCT</span>
+        </button>
+      </div>
     </div>
     <table class="table-auto shadow-md h-full w-full text-sm text-gray-500">
       <thead class="text-xs text-gray-900 border-b border-t uppercase">
@@ -60,7 +66,7 @@
           <td class="py-2">{{ product.product_item.sku }}</td>
           <td class="py-2">{{ product.name }}</td>
           <td class="py-2">{{ product.product_item.qty_stock }} / 0</td>
-          <td class="py-2">{{ product.product_item.price }}</td>
+          <td class="py-2">₱ {{ formatPrice(product.product_item.price) }}</td>
           <td class="py-2 flex justify-between">
             <p class="text-center w-full">
               {{ product.product_item.sale_price ?? 0  }}
@@ -121,8 +127,8 @@
     </div>
 
     <!-- PRODUCT MODAL -->
-    <ProductModal v-show="isModalVisible" @close="closeProductModal" @some-event="confirmCreateProduct" 
-    :loading="createProductLoading">
+    <ProductModal v-show="isProductModalVisible" @close="closeProductModal" @some-event="confirmProduct" 
+    :loading="productLoading">
         <template v-slot:header>
           {{ isEditing ? 'Edit Product' : 'Create Product '}}
         </template>
@@ -133,34 +139,16 @@
           </div>
           <div class="w-full py-2 flex flex-col space-x-0 md:space-x-6 md:flex-row">
             <div class="w-full space-y-4">
-                <div class="relative">
-                    <label for="sku">SKU</label>
-                    <input v-model="model.details.sku" id="sku" type="text" 
-                    :class=" model.errors.sku ? 'w-full py-2 border border-red-500 focus:outline-red-500 px-2' : 'w-full py-2 border px-2'"
-                      placeholder="Ex. TSH-FFF-M" maxlength="30">
-                    <p class="text-sm absolute text-red-500"> {{ model.errors.sku }}</p>
-                </div>
-                <div class="relative">
-                    <label for="name">Name</label>
-                    <input v-model="model.details.name" id="name" type="text" 
-                    :class=" model.errors.name ? 'w-full py-2 border border-red-500 focus:outline-red-500 px-2' 
-                    : 'w-full py-2 border px-2'" placeholder="Ex. Oxygn Apparrel" maxlength="30">
-                    <p class="text-sm absolute text-red-500"> {{ model.errors.name }}</p>
-                </div>
-            </div>
+                <Input v-model="model.details.sku" label="SKU" placeholder="Ex. TSH-FFF-M" 
+                :error="model.errors.sku"/>
+                <Input v-model="model.details.name" label="Name" placeholder="Ex. Oxygn Apparrel" 
+                :error="model.errors.name"/>
+              </div>
             <div class="w-full space-y-4">
-              <div class="relative">
-                  <label for="price">Price</label>
-                  <input v-model="model.details.price" v-on:keypress="numberkey" id="price" type="text" 
-                  :class=" model.errors.price ? 'w-full py-2 border border-red-500 focus:outline-red-500 px-2' : 'w-full py-2 border px-2'" placeholder="₱" maxlength="10">
-                  <p class="text-sm absolute text-red-500"> {{ model.errors.price }}</p>
-              </div>
-              <div class="relative">
-                <label for="qty_stock">Qty Stock (All Sizes)</label>
-                <input v-model="model.details.qty_stock" v-on:keypress="numberkey" id="qty_stock" type="text" 
-                :class=" model.errors.qty_stock ? 'w-full py-2 border border-red-500 focus:outline-red-500 px-2' : 'w-full py-2 border px-2'" placeholder="Ex. 10" maxlength="10">
-                <p class="text-sm absolute text-red-500"> {{ model.errors.qty_stock }}</p>
-              </div>
+              <Input v-model="model.details.price" v-on:keypress="numberkey" label="Price" placeholder="₱" 
+              :error="model.errors.price"/>
+              <Input v-model="model.details.qty_stock" v-on:keypress="numberkey" 
+              label="Qty Stock (All Sizes)" placeholder="Ex. 10" :error="model.errors.qty_stock"/>
             </div>
           </div>
           <div>
@@ -198,17 +186,9 @@
               <div id="color" class="space-y-2 relative" v-if="attribute.name === 'Color'">
                 <label class="mt-5 inline-block">Color: <span class="text-gray-700 font-semibold mt-4">{{ model.details.color }}</span></label>
                 <div class="grid grid-cols-8">
-                  <Color @click="selectColor('yellow')" color="yellow" :currentColor="model.details.color" circleColor="text-yellow-500"/>
-                  <Color @click="selectColor('green')" color="green" :currentColor="model.details.color" circleColor="text-green-500"/>
-                  <Color @click="selectColor('blue')" color="blue" :currentColor="model.details.color" circleColor="text-blue-500"/>
-                  <Color @click="selectColor('violet')" color="violet" :currentColor="model.details.color" circleColor="text-violet-500"/>
-                  <Color @click="selectColor('red')" color="red" :currentColor="model.details.color" circleColor="text-red-600"/>
-                  <Color @click="selectColor('orange')" color="orange" :currentColor="model.details.color" circleColor="text-orange-500"/>
-                  <Color @click="selectColor('gray')" color="gray" :currentColor="model.details.color" circleColor="text-gray-500"/>
-                  <Color @click="selectColor('pink')" color="pink" :currentColor="model.details.color" circleColor="text-pink-500"/>
-                  <Color @click="selectColor('black')" color="black" :currentColor="model.details.color" circleColor="text-black"/>
-                  <Color @click="selectColor('white')" color="white" :currentColor="model.details.color" circleColor="text-white"/>
-                  <Color @click="selectColor('brown')" color="brown" :currentColor="model.details.color" circleColor="text-amber-600"/>
+                  <Color v-for="color in model.colors" :key="color" 
+                  @click="selectColor(color.color)" :color="color.color" 
+                  :currentColor="model.details.color" :circleColor="color.class"/>
                 </div>
               </div>
               <div id="size" class="relative" v-if="attribute.name === 'Size'">
@@ -232,7 +212,7 @@
                 <select :id="attribute.name" 
                 class='attribute w-full py-2 border px-2 mt-2'>
                   <option selected disabled>Select</option>
-                  <option v-for="value in attribute.values" :key="value.id" :value="value.name">
+                  <option v-for="value in attribute.values" :key="value.id" :value="value.name" class="flex justify-between">
                     {{ value.name }}
                   </option>
                 </select>
@@ -280,11 +260,8 @@
       </template>
 
       <template v-slot:body>
-        <input v-model="model.attributes.newAttributeValue" type="text" 
-        :class=" model.errors.valueError
-        ? 'w-full py-2 border border-red-500 focus:outline-red-500 px-2' 
-        : 'w-full py-2 border px-2'" placeholder="Value">
-        <p class="text-sm absolute text-red-500"> {{ model.errors.valueError }}</p>
+        <Input v-model="model.attributes.newAttributeValue" label="Value" placeholder="Value" 
+        :error="model.errors.valueError"/>
       </template>
     </Modal>
 
@@ -296,8 +273,11 @@
       </template>
 
       <template v-slot:body>
+        <Input v-model="model.sizes.totalOfSize" v-on:keypress="numberkey" maxlength="4" label="Total" placeholder="Total" 
+        :error="model.errors.valueError"/>
+<!-- 
         <input v-model="model.sizes.totalOfSize" type="text" class="w-full py-2 border px-2" 
-        v-on:keypress="numberkey" placeholder="Total" min="0" maxlength="3">
+        v-on:keypress="numberkey" placeholder="Total" min="0" maxlength="3"> -->
       </template>
     </Modal>
 
@@ -339,7 +319,6 @@
         </p>
       </template>
     </Modal>
-    <!-- TODO:: SEARCH, SORTING -->
   </div>
 </template>
 
@@ -355,8 +334,9 @@ import Pagination from '../../components/Pagination.vue'
 import Modal from '../../components/Modal.vue'
 import Color from '../../components/Icons/Color.vue'
 import Size from '../../components/Icons/Size.vue'
+import Input from '../../components/form/Input.vue'
 
-  const isModalVisible = ref(false)
+  const isProductModalVisible = ref(false)
   const isValueModalVisible = ref(false)
   const isSizeModalVisible = ref(false)
   const isDeleteModalVisible = ref(false)
@@ -403,6 +383,14 @@ import Size from '../../components/Icons/Size.vue'
       productList : [],
       currentProduct : '',
     },
+    colors : [
+      { color : 'yellow', class : 'text-yellow-500'},  { color : 'green', class : 'text-green-500'}, 
+      { color : 'blue', class : 'text-blue-500'},  { color : 'violet', class : 'text-violet-500'}, 
+      { color : 'red', class : 'text-red-500'},  { color : 'orange', class : 'text-orange-500'}, 
+      { color : 'gray', class : 'text-gray-500'},  { color : 'pink', class : 'text-pink-500'}, 
+      { color : 'black', class : 'text-black'},  { color : 'white', class : 'text-white'}, 
+      { color : 'brown', class : 'text-amber-600'}, 
+    ],
     entries : {
       showEntries : [5, 10, 25, 50, 100],
       currentEntry : 5
@@ -420,6 +408,7 @@ import Size from '../../components/Icons/Size.vue'
       name : '',
       price : '',
       qty_stock : '',
+      connection : false
     },
     
   })
@@ -427,7 +416,7 @@ import Size from '../../components/Icons/Size.vue'
   const mainCategories = computed(() => store.state.categories.mainCategory)
   const subCategories = computed(() => store.state.categories.subCategory)
   const productsLoading = computed(() => store.state.products.loading)
-  const createProductLoading = computed(() => store.state.products.createProductLoading)
+  const productLoading = computed(() => store.state.products.createProductLoading)
 
   watch(() => store.state.categories.attribute,
     (newVal, oldVal) => model.value.attributes.attributeList = newVal
@@ -442,15 +431,14 @@ import Size from '../../components/Icons/Size.vue'
   )
 
   onMounted(async () => {
-    await store.dispatch('getMainCategory')
-    await store.dispatch('getSubCategory', model.value.categories.mainCategoryId)
-    await store.dispatch('getAttribute', model.value.categories.subCategoryId)
-    const formData = new FormData()
-    formData.append('entry', model.value.entries.currentEntry)
-    formData.append('sort', model.value.sort.currentSort)
-    formData.append('current_page', model.value.paginate.currentPage)
-    formData.append("_method", "get");
-    await store.dispatch('getAllProducts', formData)
+    try {
+      await store.dispatch('getMainCategory')
+      await store.dispatch('getSubCategory', model.value.categories.mainCategoryId)
+      getAttribute()
+      getAllProducts()
+    } catch (error) {
+      model.value.errors.connection = true
+    }
   })
 
   // MODALS
@@ -468,7 +456,7 @@ import Size from '../../components/Icons/Size.vue'
 
       // Setting all fields baseon on current product details
       const product = model.value.products.currentProduct
-      isModalVisible.value = true
+      isProductModalVisible.value = true
       model.value.details.sku = product.product_item.sku
       model.value.details.name = product.name
       model.value.details.price = product.product_item.price
@@ -494,11 +482,11 @@ import Size from '../../components/Icons/Size.vue'
       }, 2000)
 
     } else {
-      isModalVisible.value = true
+      isProductModalVisible.value = true
     }
   }
   const closeProductModal = () => {
-    isModalVisible.value = false
+    isProductModalVisible.value = false
     // Reset the fields to default values
     if(isEditing.value){
       model.value.details.sku = ''
@@ -537,9 +525,10 @@ import Size from '../../components/Icons/Size.vue'
   // MODAL FUNCTIONS
   const confirmSelectSize = () => {
     const size = model.value.sizes.selectedSize
+    const totalSize = model.value.sizes.totalOfSize
     model.value.sizes.sizeList.forEach(obj => {
         if(obj.name === size){
-          obj.count = model.value.sizes.totalOfSize != 0 ? parseInt(model.value.sizes.totalOfSize) : 0
+          obj.count = totalSize != 0 ? parseInt(totalSize) : 0
         }
     })
     closeSizeModal()
@@ -547,7 +536,7 @@ import Size from '../../components/Icons/Size.vue'
     model.value.sizes.totalOfSize = 0
   }
 
-  const confirmCreateProduct = async () => {
+  const confirmProduct = async () => {
 
     // Removing all errors
     const errors = document.querySelectorAll('.error')
@@ -563,7 +552,6 @@ import Size from '../../components/Icons/Size.vue'
 
     attributes.forEach(element   => {
       if(element.value == 'Select'){
-        attributeSelected = false
         element.classList.add('border-red-500')
         let parent = element.parentElement
         const paragraph = document.createElement("p");
@@ -726,7 +714,7 @@ import Size from '../../components/Icons/Size.vue'
         isDeleteModalVisible.value = false
         alert('Product deleted successfully!')
       } catch (error) {
-
+        model.value.errors.connection = true
       }
     }
   }
@@ -739,17 +727,19 @@ import Size from '../../components/Icons/Size.vue'
         model.value.sizes.totalOfSize = obj.count
       }
     })
-
-  }
-  const chooseCategory = async () => { 
-    const res = await store.dispatch('getSubCategory', model.value.categories.mainCategoryId)
-    model.value.categories.subCategoryId = res.data.data[0].id
-    await store.dispatch('getAttribute', model.value.categories.subCategoryId)
   }
 
-  const chooseSubCategory = async () => { 
-    await store.dispatch('getAttribute', model.value.categories.subCategoryId)
+  const chooseCategory = async () => {
+    try {
+      const res = await store.dispatch('getSubCategory', model.value.categories.mainCategoryId)
+      model.value.categories.subCategoryId = res.data.data[0].id
+      getAttribute()
+    } catch (error) {
+      model.value.errors.connection = true
+    }
   }
+
+  const chooseSubCategory = async () =>  getAttribute()
 
   const chooseImage = () => {
     let image = document.querySelector('#image')
@@ -793,19 +783,21 @@ import Size from '../../components/Icons/Size.vue'
     }
   }
 
-  const view = () => {
-    let current_page = model.value.products.productList.current_page
-    let pageNum = current_page ? current_page : 1
-    model.value.paginate.currentPage = pageNum
-    const formData = new FormData()
-    formData.append('entry', model.value.entries.currentEntry)
-    formData.append('sort', model.value.sort.currentSort)
-    formData.append('current_page', model.value.paginate.currentPage)
-    formData.append("_method", "get")
-    axiosClient.post(`/product/?page=${pageNum}`, formData)
-      .then((res) => {
-        model.value.products.productList = res.data.data
-      })
+  const view = async () => {
+    try {
+      let current_page = model.value.products.productList.current_page
+      let pageNum = current_page ? current_page : 1
+      model.value.paginate.currentPage = pageNum
+      const formData = new FormData()
+      formData.append('entry', model.value.entries.currentEntry)
+      formData.append('sort', model.value.sort.currentSort)
+      formData.append('current_page', model.value.paginate.currentPage)
+      formData.append("_method", "get")
+      const res = await axiosClient.post(`/product/?page=${pageNum}`, formData)
+      model.value.products.productList = res.data.data
+    } catch (error) {
+      model.value.errors.connection = true
+    }
   }
 
   const showDotDropdown = (id) => {
@@ -830,25 +822,10 @@ import Size from '../../components/Icons/Size.vue'
     })
   }
 
-  const chooseEntry = async () => {
-    const formData = new FormData()
-    formData.append('entry', model.value.entries.currentEntry)
-    formData.append('sort', model.value.sort.currentSort)
-    formData.append('current_page', model.value.paginate.currentPage)
-    formData.append("_method", "get");
-    await store.dispatch('getAllProducts', formData)
-  }
-
-  const chooseSort = async () => {
-    const formData = new FormData()
-    formData.append('entry', model.value.entries.currentEntry)
-    formData.append('sort', model.value.sort.currentSort)
-    formData.append('current_page', model.value.paginate.currentPage)
-    formData.append("_method", "get");
-    await store.dispatch('getAllProducts', formData)
-  }
-  
+  const chooseEntry = () => getAllProducts()
+  const chooseSort = async () => getAllProducts()
   const searchProduct = () => {
+    // Debouncing
     setTimeout(() => {
       const formData = new FormData()
       formData.append('search', model.value.details.search)
@@ -862,4 +839,30 @@ import Size from '../../components/Icons/Size.vue'
     searchProduct()
   }
 
+  const getAllProducts = async () => {
+    try {
+      const formData = new FormData()
+      formData.append('entry', model.value.entries.currentEntry)
+      formData.append('sort', model.value.sort.currentSort)
+      formData.append('current_page', model.value.paginate.currentPage)
+      formData.append("_method", "get")
+      const res = await store.dispatch('getAllProducts', formData)
+      return res.data
+    } catch (error) {
+      model.value.errors.connection = true
+    }
+  } 
+
+  const getAttribute = async () => {
+    try {
+      const res = await store.dispatch('getAttribute', model.value.categories.subCategoryId)
+      return res
+    } catch (error) {
+      model.value.errors.connection = true
+    }
+  }
+
+  const formatPrice = (price) => {
+    return price.toLocaleString()
+  }
 </script>
