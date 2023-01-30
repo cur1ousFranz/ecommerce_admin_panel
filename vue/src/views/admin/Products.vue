@@ -384,16 +384,16 @@ import Input from '../../components/form/Input.vue'
       currentProduct : '',
     },
     colors : [
-      { color : 'yellow', class : 'text-yellow-500'},  { color : 'green', class : 'text-green-500'}, 
-      { color : 'blue', class : 'text-blue-500'},  { color : 'violet', class : 'text-violet-500'}, 
-      { color : 'red', class : 'text-red-500'},  { color : 'orange', class : 'text-orange-500'}, 
-      { color : 'gray', class : 'text-gray-500'},  { color : 'pink', class : 'text-pink-500'}, 
-      { color : 'black', class : 'text-black'},  { color : 'white', class : 'text-white'}, 
-      { color : 'brown', class : 'text-amber-600'}, 
+      { color : 'Yellow', class : 'text-yellow-500'},  { color : 'Green', class : 'text-green-500'}, 
+      { color : 'Blue', class : 'text-blue-500'},  { color : 'Violet', class : 'text-violet-500'}, 
+      { color : 'Red', class : 'text-red-500'},  { color : 'Orange', class : 'text-orange-500'}, 
+      { color : 'Gray', class : 'text-gray-500'},  { color : 'Pink', class : 'text-pink-500'}, 
+      { color : 'Black', class : 'text-black'},  { color : 'White', class : 'text-white'}, 
+      { color : 'Brown', class : 'text-amber-600'}, 
     ],
     entries : {
-      showEntries : [5, 10, 25, 50, 100],
-      currentEntry : 5
+      showEntries : [10, 25, 50, 100],
+      currentEntry : 10
     },
     sort : {
       sortList : ['Latest', 'Oldest', 'Sku', 'Name', 'Qty', 'Price'],
@@ -462,8 +462,8 @@ import Input from '../../components/form/Input.vue'
       model.value.details.price = product.product_item.price
       model.value.details.qty_stock = product.product_item.qty_stock
       model.value.images.imageBase64 = JSON.parse(product.product_item.product_image)
-      model.value.sizes.sizeList = JSON.parse(product.description).size
-      model.value.details.color = JSON.parse(product.description).color
+      model.value.sizes.sizeList = JSON.parse(product.description).Size
+      model.value.details.color = JSON.parse(product.description).Color
       
       // Changing id's of categories and call category request
       model.value.categories.mainCategoryId = product.categories[0].parent_id
@@ -627,8 +627,8 @@ import Input from '../../components/form/Input.vue'
       if(attributeSelected && sizeSelected && colorSelected && imageSelected && qtyStockSizeEqual){
         const attributeObj = {}
         attributes.forEach(element => attributeObj[element.id] = element.value)
-        attributeObj.color = model.value.details.color
-        attributeObj.size = model.value.sizes.sizeList
+        attributeObj.Color = model.value.details.color
+        attributeObj.Size = model.value.sizes.sizeList
 
         const formData = new FormData()
         if(isEditing.value){
@@ -703,19 +703,15 @@ import Input from '../../components/form/Input.vue'
 
   const confirmDeleteProduct = async (product_id) => {
     if(product_id){
-      try {
-        const formData = new FormData()
-        formData.append('entry', model.value.entries.currentEntry)
-        formData.append('sort', model.value.sort.currentSort)
-        formData.append('current_page', model.value.paginate.currentPage)
-        formData.append('product_id', product_id)
-        formData.append("_method", "delete")
-        await store.dispatch('deleteProduct', formData)
-        isDeleteModalVisible.value = false
-        alert('Product deleted successfully!')
-      } catch (error) {
-        model.value.errors.connection = true
-      }
+      const formData = new FormData()
+      formData.append('entry', model.value.entries.currentEntry)
+      formData.append('sort', model.value.sort.currentSort)
+      formData.append('current_page', model.value.paginate.currentPage)
+      formData.append('product_id', product_id)
+      formData.append("_method", "delete")
+      await store.dispatch('deleteProduct', formData)
+      isDeleteModalVisible.value = false
+      alert('Product deleted successfully!')
     }
   }
 

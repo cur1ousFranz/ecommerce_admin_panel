@@ -11,7 +11,7 @@
           : 'w-full py-2 border px-2'
       "
       :placeholder="placeHolder"
-      maxlength="30"
+      maxlength="50"
       v-bind="$attrs"
     />
     <p class="text-sm absolute text-red-500"> {{ error }}</p>
