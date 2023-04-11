@@ -275,9 +275,6 @@
       <template v-slot:body>
         <Input v-model="model.sizes.totalOfSize" v-on:keypress="numberkey" maxlength="4" label="Total" placeholder="Total" 
         :error="model.errors.valueError"/>
-<!-- 
-        <input v-model="model.sizes.totalOfSize" type="text" class="w-full py-2 border px-2" 
-        v-on:keypress="numberkey" placeholder="Total" min="0" maxlength="3"> -->
       </template>
     </Modal>
 
